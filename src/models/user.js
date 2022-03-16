@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const { Schema } = mongoose;
 
@@ -18,6 +19,20 @@ const userSchema = new Schema({
   },
   profileImg: String,
 });
+
+// 비밀번호 암호화 메서드
+userSchema.methods.encryptPassword = async function (userPw) {
+  const hashedPassword = await bcrypt.hash(userPw, 10);
+  this.userPw = hashedPassword;
+};
+
+// 유저 인스턴스 직렬화 및 비밀번호 삭제
+userSchema.methods.serialize = function () {
+  const data = this.toJSON();
+  delete data.userPw;
+
+  return data;
+};
 
 // document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
 userSchema.statics.checkUser = function (userId) {
