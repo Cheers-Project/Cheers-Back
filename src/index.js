@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { find } = require('prettier');
+
+require('dotenv').config();
 
 const { Schema } = mongoose;
 const app = express();
@@ -9,9 +10,7 @@ const port = 4000;
 
 // DB 연동
 mongoose
-  .connect(
-    'mongodb+srv://lemon_admin:OMrBoBhQE40flddJ@lemonalcohol.btron.mongodb.net/lemon?retryWrites=true&w=majority',
-  )
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log('DB connected'))
   .catch((err) => console.log(err));
 
