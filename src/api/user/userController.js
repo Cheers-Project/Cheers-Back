@@ -18,7 +18,7 @@ exports.login = async (req, res, next) => {
 
   try {
     // 유저 아이디로 유효성 검사
-    const userInfo = await User.findOne({ userId }).exec();
+    const userInfo = await User.checkUser(userId);
     // request 정보가 DB에 없을 때
     if (!userInfo) {
       res
@@ -36,6 +36,8 @@ exports.login = async (req, res, next) => {
     res.status(200).json({ msg: '로그인 완료' });
   } catch (err) {
     res.status(500).send({ msg: '서버 오류' });
+  }
+};
 
 exports.regist = async (req, res) => {
   const { userId, userPw, nickname, profileImg } = req.body;
