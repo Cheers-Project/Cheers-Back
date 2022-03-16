@@ -33,7 +33,8 @@ exports.login = async (req, res, next) => {
       return;
     }
 
-    res.status(200).json({ msg: '로그인 완료' });
+    const token = userInfo.generateToken();
+    res.status(200).json({ msg: '로그인 완료', accessToken: token });
   } catch (err) {
     res.status(500).send({ msg: '서버 오류' });
   }
