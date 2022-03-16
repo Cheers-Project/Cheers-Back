@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+const api = require('./api');
+
 require('dotenv').config();
 
 const { Schema } = mongoose;
@@ -37,6 +39,8 @@ app.post('/create', async (req, res) => {
 
   console.log(result);
 });
+
+app.use('/api', api);
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
