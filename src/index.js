@@ -1,23 +1,42 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const { find } = require('prettier');
+
+const { Schema } = mongoose;
 const app = express();
 const port = 4000;
+
+// DB 연동
+mongoose
+  .connect(
+    'mongodb+srv://lemon_admin:OMrBoBhQE40flddJ@lemonalcohol.btron.mongodb.net/lemon?retryWrites=true&w=majority',
+  )
+  .then(() => console.log('DB connected'))
+  .catch((err) => console.log(err));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-// user dummy
-const user = {
-  userId: 'jungjin',
-  userPw: '1234',
-};
+// 더미 유저 생성
+app.post('/create', async (req, res) => {
+  // 스키마
+  const userSchema = new Schema({
+    userId: String,
+    userPw: String,
+    nickname: String,
+    profileImg: String,
+  });
 
-// 로그인 연결 테스트
-app.post('/login', (req, res) => {
-  const body = req.body;
-  res.send(user);
+  // 모델
+  const User = mongoose.model('User', userSchema);
+  const user = new User(req.body);
+
+  const result = await user.save();
+
+  console.log(result);
 });
 
 app.listen(port, () => {
