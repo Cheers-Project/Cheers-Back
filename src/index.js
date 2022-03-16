@@ -19,25 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-// 더미 유저 생성
-app.post('/create', async (req, res) => {
-  // 스키마
-  const userSchema = new Schema({
-    userId: String,
-    userPw: String,
-    nickname: String,
-    profileImg: String,
-  });
-
-  // 모델
-  const User = mongoose.model('User', userSchema);
-  const user = new User(req.body);
-
-  const result = await user.save();
-
-  console.log(result);
-});
-
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
 });
