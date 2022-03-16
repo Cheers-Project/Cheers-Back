@@ -1,4 +1,5 @@
 const User = require('../../models/user');
+const Joi = require('joi');
 
 // login
 exports.login = async (req, res, next) => {
@@ -36,16 +37,32 @@ exports.login = async (req, res, next) => {
     res.status(200).json({ msg: '로그인 완료' });
   } catch (err) {
     res.status(500).send({ msg: '서버 오류' });
+  }
+};
 
 exports.regist = async (req, res) => {
-  const { userId, userPw, nickname, profileImg } = req.body;
-
-  const user = new User({
-    userId,
-    userPw,
-    nickname,
-    profileImg,
+  const schema = Joi.object({
+    userId: Joi.string()
+      .email({ tlds: { allow: ['com', 'net', 'kr'] } })
+      .required(),
+    userPw: Joi.string()
+      .pattern(
+        new RegExp('^(?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,20}$'),
+      )
+      .required(),
+    repeatPw: Joi.ref('userPw'),
+    nickname: Joi.string().min(2).max(10).required(),
+    profileImg: Joi.string(),
   });
+
+  const validatedResult = schema.validate(req.body);
+
+  if (validatedResult.error) {
+    res.status(400).send({ error: validatedResult.error });
+    return;
+  }
+
+  const { userId, userPw, nickname, profileImg } = req.body;
 
   try {
     const exist = await User.checkUser(userId);
@@ -54,8 +71,21 @@ exports.regist = async (req, res) => {
       res.status(400).send({ msg: '이미 존재하는 아이디 입니다.' });
       return;
     }
-    res.send('success');
+
+    const user = new User({
+      userId,
+      userPw,
+      nickname,
+      profileImg,
+    });
+
+    await user.encryptPassword(userPw);
+    await user.save();
+
+    const data = user.serialize();
+
+    res.status(200).send({ data, msg: '회원가입 성공' });
   } catch (e) {
-    console.log(e);
+    res.status(500).send({ msg: '서버 오류', e });
   }
 };
