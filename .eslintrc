@@ -1,0 +1,37 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "commonjs": true,
+    "es6": true
+  },
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "camelcase": "off",
+    "prettier/prettier": 0,
+    "no-console": "warn",
+    "no-shadow": "off",
+    "vars-on-top": "off",
+    "no-underscore-dangle": "off",
+    "comma-dangle": "off",
+    "func-names": "off",
+    "prefer-template": "off",
+    "no-nested-ternary": "off",
+    "max-classes-per-file": "off",
+    "consistent-return": "off",
+    "no-restricted-syntax": ["off", "ForOfStatement"],
+    "prefer-arrow-callback": "error",
+    "require-await": "error",
+    "no-param-reassign": ["error", { "props": false }],
+    "max-len": "off",
+    "no-unused-expressions": "off"
+  }
+}
