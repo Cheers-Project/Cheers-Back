@@ -60,6 +60,11 @@ userSchema.statics.checkUser = function (userId) {
   return this.findOne({ userId });
 };
 
+// 닉네임 확인
+userSchema.statics.checkNickname = function (nickname) {
+  return this.findOne({ nickname });
+};
+
 // 모델
 const User = mongoose.model('User', userSchema);
 

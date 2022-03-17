@@ -55,7 +55,7 @@ exports.regist = async (req, res) => {
       .required(),
     repeatPw: Joi.ref('userPw'),
     nickname: Joi.string().min(2).max(10).required(),
-    profileImg: Joi.string(),
+    profileImg: Joi.string().allow(''),
   });
 
   const validatedResult = schema.validate(req.body);
@@ -68,10 +68,17 @@ exports.regist = async (req, res) => {
   const { userId, userPw, nickname, profileImg } = req.body;
 
   try {
-    const exist = await User.checkUser(userId);
+    const existId = await User.checkUser(userId);
 
-    if (exist) {
-      res.status(400).send({ msg: '이미 존재하는 아이디 입니다.' });
+    if (existId) {
+      res.status(400).send({ msg: '사용중인 아이디 입니다.' });
+      return;
+    }
+
+    const existNickname = await User.checkNickname(nickname);
+
+    if (existNickname) {
+      res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
       return;
     }
 
