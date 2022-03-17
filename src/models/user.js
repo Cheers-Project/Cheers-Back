@@ -27,17 +27,18 @@ userSchema.methods.encryptPassword = async function (userPw) {
   this.userPw = hashedPassword;
 };
 
+// 비밀번호 복호화 및 확인 메서드
+userSchema.methods.validatePw = async function (userPw) {
+  const res = await bcrypt.compare(userPw, this.userPw);
+  return res;
+};
+
 // 유저 인스턴스 직렬화 및 비밀번호 삭제
 userSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.userPw;
 
   return data;
-};
-
-// document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
-userSchema.statics.checkUser = function (userId) {
-  return this.findOne({ userId });
 };
 
 // jwt 토큰 발급 인스턴스 메서드 생성
@@ -52,6 +53,11 @@ userSchema.methods.generateToken = function () {
     },
   );
   return token;
+};
+
+// document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
+userSchema.statics.checkUser = function (userId) {
+  return this.findOne({ userId });
 };
 
 // 모델
