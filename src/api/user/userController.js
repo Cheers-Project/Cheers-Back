@@ -29,7 +29,9 @@ exports.login = async (req, res, next) => {
     }
     // 비밀번호 유효성 검사
     // request 비밀번호화 DB 비밀번호가 다를 때
-    if (userInfo.userPw !== userPw) {
+    const checkPw = await userInfo.validatePw(userPw);
+
+    if (!checkPw) {
       res.status(401).send({ msg: '비밀번호가 일치 하지 않습니다.' });
       return;
     }
