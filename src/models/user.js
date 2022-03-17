@@ -40,6 +40,11 @@ userSchema.statics.checkUser = function (userId) {
   return this.findOne({ userId });
 };
 
+// 닉네임 확인
+userSchema.statics.checkNickname = function (nickname) {
+  return this.findOne({ nickname });
+};
+
 // jwt 토큰 발급 인스턴스 메서드 생성
 userSchema.methods.generateToken = function () {
   const token = jwt.sign(
