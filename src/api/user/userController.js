@@ -1,5 +1,6 @@
 const User = require('../../models/user');
 const Joi = require('joi');
+const axios = require('axios').default;
 
 // login
 exports.login = async (req, res, next) => {
@@ -38,8 +39,29 @@ exports.login = async (req, res, next) => {
 
     const token = userInfo.generateToken();
     res.status(200).json({ msg: '로그인 완료', accessToken: token });
-  } catch (err) {
+  } catch (e) {
     res.status(500).send({ msg: '서버 오류' });
+  }
+};
+
+exports.socialLogin = async (req, res) => {
+  const { access_token: ACCESS_TOKEN } = req.body;
+  try {
+    const kakaoInfo = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    });
+    const {
+      data: {
+        kakao_account: { profile: userInfo },
+      },
+    } = kakaoInfo;
+    console.log(userInfo);
+    res.status(200).send({ userInfo });
+  } catch (e) {
+    res.status(500).send({ msg: '카카오 로그인 실패' });
   }
 };
 
