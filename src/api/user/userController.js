@@ -44,6 +44,9 @@ exports.login = async (req, res, next) => {
 };
 
 exports.regist = async (req, res) => {
+  const { userId, userPw, repeatPw, nickname } = req.body;
+  const profileImg = req.file;
+
   const schema = Joi.object({
     userId: Joi.string()
       .email({ tlds: { allow: ['com', 'net', 'kr'] } })
@@ -55,17 +58,21 @@ exports.regist = async (req, res) => {
       .required(),
     repeatPw: Joi.ref('userPw'),
     nickname: Joi.string().min(2).max(10).required(),
-    profileImg: Joi.string().allow(''),
+    profileImg: Joi.object(),
   });
 
-  const validatedResult = schema.validate(req.body);
+  const validatedResult = schema.validate({
+    userId,
+    userPw,
+    repeatPw,
+    nickname,
+    profileImg,
+  });
 
   if (validatedResult.error) {
     res.status(400).send({ error: validatedResult.error });
     return;
   }
-
-  const { userId, userPw, nickname, profileImg } = req.body;
 
   try {
     const existId = await User.checkUser(userId);

@@ -18,7 +18,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  profileImg: String,
+  profileImg: Object,
 });
 
 // 비밀번호 암호화 메서드
