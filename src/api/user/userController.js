@@ -45,8 +45,20 @@ exports.login = async (req, res, next) => {
   }
 };
 
+// social login
+
 exports.socialLogin = async (req, res) => {
-  const { access_token: ACCESS_TOKEN } = req.body;
+  // request
+  const { accessToken: ACCESS_TOKEN, nickname } = req.body;
+
+  // 닉네임 중복 확인
+  const existNickname = await User.checkNickname(nickname);
+
+  if (existNickname) {
+    res.status(400).send({ msg: '사용중인 닉네임입니다.' });
+    return;
+  }
+  // 유저 정보 받아오기, 우리 토큰 발급해주기
   try {
     const kakaoInfo = await axios.get('https://kapi.kakao.com/v2/user/me', {
       headers: {
@@ -54,13 +66,33 @@ exports.socialLogin = async (req, res) => {
         'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
       },
     });
+
+    // 프로필 이미지
     const {
       data: {
         kakao_account: { profile: userInfo },
       },
     } = kakaoInfo;
-    console.log(userInfo);
-    res.status(200).send({ userInfo });
+
+    // 카카오 고유 아이디로 이미 로그인을 했었다면 메인페이지로 이동
+
+    const userId = kakaoInfo.data.id;
+
+    const { profile_image_url: profileImg } = userInfo;
+
+    const socialUser = new User({
+      userId,
+      nickname,
+      profileImg,
+      isSocial: true,
+    });
+
+    const accessToken = socialUser.generateToken();
+
+    await socialUser.save();
+    res
+      .status(200)
+      .send({ msg: '카카오 로그인 성공', accessToken, profileImg });
   } catch (e) {
     res.status(500).send({ msg: '카카오 로그인 실패' });
   }
