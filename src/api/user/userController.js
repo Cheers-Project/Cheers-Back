@@ -1,5 +1,6 @@
 const User = require('../../models/user');
 const Joi = require('joi');
+const s3 = require('../../config/s3');
 const axios = require('axios').default;
 
 // login
@@ -99,7 +100,7 @@ exports.socialLogin = async (req, res) => {
 
 exports.regist = async (req, res) => {
   const { userId, userPw, repeatPw, nickname } = req.body;
-  const profileImg = req.file;
+  const { location: profileImg, key: profileImgKey } = req.file;
 
   const schema = Joi.object({
     userId: Joi.string()
@@ -112,7 +113,7 @@ exports.regist = async (req, res) => {
       .required(),
     repeatPw: Joi.ref('userPw'),
     nickname: Joi.string().min(2).max(10).required(),
-    profileImg: Joi.object(),
+    profileImg: Joi.string(),
   });
 
   const validatedResult = schema.validate({
@@ -124,6 +125,15 @@ exports.regist = async (req, res) => {
   });
 
   if (validatedResult.error) {
+    s3.deleteObject(
+      {
+        Bucket: 'lemonalcohol-s3',
+        Key: `${profileImgKey}`,
+      },
+      (err, data) => {
+        console.log(err, data);
+      },
+    );
     res.status(400).send({ error: validatedResult.error });
     return;
   }
@@ -132,6 +142,15 @@ exports.regist = async (req, res) => {
     const existId = await User.checkUser(userId);
 
     if (existId) {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${profileImgKey}`,
+        },
+        (err, data) => {
+          console.log(err, data);
+        },
+      );
       res.status(400).send({ msg: '사용중인 아이디 입니다.' });
       return;
     }
@@ -139,6 +158,15 @@ exports.regist = async (req, res) => {
     const existNickname = await User.checkNickname(nickname);
 
     if (existNickname) {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${profileImgKey}`,
+        },
+        (err, data) => {
+          console.log(err, data);
+        },
+      );
       res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
       return;
     }
