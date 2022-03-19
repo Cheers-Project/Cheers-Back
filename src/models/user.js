@@ -12,13 +12,13 @@ const userSchema = new Schema({
   },
   userPw: {
     type: String,
-    required: true,
   },
   nickname: {
     type: String,
     required: true,
   },
   profileImg: Object,
+  isSocial: { default: false, type: Boolean },
 });
 
 // 비밀번호 암호화 메서드
@@ -56,6 +56,7 @@ userSchema.methods.generateToken = function () {
 };
 
 // document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
+// 아이디 확인
 userSchema.statics.checkUser = function (userId) {
   return this.findOne({ userId });
 };
