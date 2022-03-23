@@ -49,7 +49,7 @@ exports.login = async (req, res, next) => {
 
 exports.socialLogin = async (req, res) => {
   // request
-  const { accessToken: ACCESS_TOKEN, nickname } = req.body;
+  const { kakaoToken: ACCESS_TOKEN, nickname } = req.body;
 
   // 닉네임 중복 확인
   const existNickname = await User.checkNickname(nickname);
@@ -70,15 +70,20 @@ exports.socialLogin = async (req, res) => {
     // 프로필 이미지
     const {
       data: {
+        id: kakaoId,
         kakao_account: { profile: userInfo },
       },
     } = kakaoInfo;
 
-    // 카카오 고유 아이디로 이미 로그인을 했었다면 메인페이지로 이동
-
-    const userId = kakaoInfo.data.id;
-
+    const userId = `${kakaoId}@lemon.com`;
     const { profile_image_url: profileImg } = userInfo;
+
+    const validateUser = await User.checkUser(userId);
+
+    if (validateUser) {
+      res.status(400).send({ msg: '이미 카카오 로그인을 했었습니다.' });
+      return;
+    }
 
     const socialUser = new User({
       userId,
@@ -90,9 +95,8 @@ exports.socialLogin = async (req, res) => {
     const accessToken = socialUser.generateToken();
 
     await socialUser.save();
-    res
-      .status(200)
-      .send({ msg: '카카오 로그인 성공', accessToken, profileImg });
+
+    res.status(200).send({ msg: '카카오 로그인 성공', accessToken });
   } catch (e) {
     res.status(500).send({ msg: '카카오 로그인 실패' });
   }
