@@ -1,5 +1,6 @@
 const { default: axios } = require('axios');
 const qs = require('qs');
+const User = require('../../models/user');
 
 // 카카오 인가 코드 받기 요청
 
@@ -35,14 +36,29 @@ exports.kakaoCallback = async (req, res) => {
     });
 
     // 카카오 정보
-    const kakaoInfo = await axios.get('https://kapi.kakao.com/v2/user/me', {
-      headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
-        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    const { data: kakaoInfo } = await axios.get(
+      'https://kapi.kakao.com/v2/user/me',
+      {
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
       },
-    });
+    );
 
-    console.log(kakaoInfo.data);
+    const userId = `${kakaoInfo.id}@lemon.com`;
+
+    const userInfo = await User.checkUser(userId);
+
+    if (!userInfo) {
+      return res.redirect('http://localhost:3000/oauth/kakao');
+    }
+
+    const accessToken = userInfo.generateToken();
+
+    res.cookie('accesstoken', accessToken);
+
+    return res.redirect('http://localhost:3000/');
   } catch (err) {
     console.log(err);
   }
