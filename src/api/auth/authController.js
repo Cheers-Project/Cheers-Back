@@ -2,21 +2,13 @@ const { default: axios } = require('axios');
 const qs = require('qs');
 const User = require('../../models/user');
 
-// 카카오 인가 코드 받기 요청
-
-exports.kakao = (req, res) => {
-  const { KAKAO_BASE_URL, KAKAO_API_KEY, KAKAO_REDIRECT_URI } = process.env;
-
-  const KAKAO_AUTH_URL = `${KAKAO_BASE_URL}?client_id=${KAKAO_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
-
-  res.redirect(KAKAO_AUTH_URL);
-};
-
 exports.kakaoCallback = async (req, res) => {
   // 카카오 토큰 발급
   const { code } = req.query;
-  const { KAKAO_API_KEY, KAKAO_REDIRECT_URI, KAKAO_CLIENT_SECRET } =
-    process.env;
+
+  const { KAKAO_API_KEY, KAKAO_CLIENT_SECRET } = process.env;
+
+  const KAKAO_REDIRECT_URI = 'http://localhost:3000/redirect';
 
   const payload = qs.stringify({
     grant_type: 'authorization_code',
@@ -51,15 +43,12 @@ exports.kakaoCallback = async (req, res) => {
     const userInfo = await User.checkUser(userId);
 
     if (!userInfo) {
-      res.cookie('kakaoToken', ACCESS_TOKEN);
-      return res.redirect('http://localhost:3000/oauth/kakao');
+      res.send({ kakaoToken: ACCESS_TOKEN });
     }
 
     const accessToken = userInfo.generateToken();
 
-    res.cookie('accessToken', accessToken);
-
-    return res.redirect('http://localhost:3000/');
+    res.status(200).send({ accessToken });
   } catch (err) {
     console.log(err);
   }
