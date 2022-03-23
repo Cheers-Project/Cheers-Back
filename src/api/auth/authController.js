@@ -27,13 +27,22 @@ exports.kakaoCallback = async (req, res) => {
 
   try {
     const {
-      data: { access_token },
+      data: { access_token: ACCESS_TOKEN },
     } = await axios.post(`https://kauth.kakao.com/oauth/token`, payload, {
       headers: {
         'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
       },
     });
-    console.log(access_token);
+
+    // 카카오 정보
+    const kakaoInfo = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    });
+
+    console.log(kakaoInfo.data);
   } catch (err) {
     console.log(err);
   }
