@@ -51,12 +51,13 @@ exports.kakaoCallback = async (req, res) => {
     const userInfo = await User.checkUser(userId);
 
     if (!userInfo) {
+      res.cookie('kakaoToken', ACCESS_TOKEN);
       return res.redirect('http://localhost:3000/oauth/kakao');
     }
 
     const accessToken = userInfo.generateToken();
 
-    res.cookie('accesstoken', accessToken);
+    res.cookie('accessToken', accessToken);
 
     return res.redirect('http://localhost:3000/');
   } catch (err) {
