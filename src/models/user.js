@@ -8,14 +8,12 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   userId: {
     type: String,
-    required: true,
   },
   userPw: {
     type: String,
   },
   nickname: {
     type: String,
-    required: true,
   },
   isSocial: { default: false, type: Boolean },
   profileImg: String,
