@@ -1,5 +1,4 @@
 const { default: axios } = require('axios');
-const qs = require('qs');
 const User = require('../../models/user');
 
 exports.kakaoCallback = async (req, res) => {
@@ -10,13 +9,13 @@ exports.kakaoCallback = async (req, res) => {
 
   const KAKAO_REDIRECT_URI = 'http://localhost:3000/redirect';
 
-  const payload = qs.stringify({
+  const payload = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: KAKAO_API_KEY,
     redirect_uri: KAKAO_REDIRECT_URI,
     code: code,
     client_secret: KAKAO_CLIENT_SECRET,
-  });
+  }).toString();
 
   try {
     const {
