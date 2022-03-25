@@ -6,17 +6,12 @@ const { Schema } = mongoose;
 
 // 스키마
 const userSchema = new Schema({
-  userId: {
-    type: String,
-  },
-  userPw: {
-    type: String,
-  },
-  nickname: {
-    type: String,
-  },
+  userId: String,
+  userPw: String,
+  nickname: String,
   isSocial: { default: false, type: Boolean },
   profileImg: String,
+  refreshToken: String,
 });
 
 // 비밀번호 암호화 메서드
@@ -41,7 +36,17 @@ userSchema.methods.serialize = function () {
 
 // jwt 토큰 발급 인스턴스 메서드 생성
 userSchema.methods.generateToken = function () {
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
+    {
+      nickname: this.nickname,
+    },
+    process.env.JWT_SECRET_KEY,
+    {
+      expiresIn: '10m',
+    },
+  );
+
+  const refreshToken = jwt.sign(
     {
       nickname: this.nickname,
     },
@@ -50,7 +55,11 @@ userSchema.methods.generateToken = function () {
       expiresIn: '1d',
     },
   );
-  return token;
+  return { accessToken, refreshToken };
+};
+
+userSchema.methods.saveRefreshToken = function (refreshToken) {
+  this.refreshToken = refreshToken;
 };
 
 // document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
