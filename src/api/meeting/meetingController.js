@@ -24,31 +24,14 @@ exports.createMeeting = async (req, res) => {
   res.status(200).send(meeting);
 };
 
-const findNearMeeting = async (lon, lat) => {
-  try {
-    const meeting = await Meeting.find({
-      location: {
-        $near: {
-          $maxDistance: 2000,
-          $geometry: {
-            type: 'Point',
-            coordinates: [lon, lat],
-          },
-        },
-      },
-    });
-
-    return meeting;
-  } catch (e) {
-    console.log(e);
-  }
-};
-
 // 주변 모임 얻기
 exports.searchNearMeeting = async (req, res) => {
   const { lon, lat } = req.query;
 
-  const meetings = await findNearMeeting(lon, lat);
-
-  res.send(meetings);
+  try {
+    const meeting = await Meeting.findNearMeeting(lon, lat);
+    res.send(meeting);
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
 };

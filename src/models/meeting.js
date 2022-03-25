@@ -36,6 +36,21 @@ const meetingSchema = new Schema({
   },
 });
 
+meetingSchema.statics.findNearMeeting = async function (lon, lat) {
+  const meeting = await this.find({
+    location: {
+      $near: {
+        $maxDistance: 2000,
+        $geometry: {
+          type: 'Point',
+          coordinates: [lon, lat],
+        },
+      },
+    },
+  });
+  return meeting;
+};
+
 meetingSchema.index({ location: '2dsphere' });
 
 const Meeting = mongoose.model('Meeting', meetingSchema);
