@@ -38,15 +38,18 @@ exports.login = async (req, res, next) => {
       return;
     }
 
-    const token = userInfo.generateToken();
-    res.status(200).json({ msg: '로그인 완료', accessToken: token });
+    const { accessToken, refreshToken } = userInfo.generateToken();
+
+    userInfo.saveRefreshToken(refreshToken);
+    await userInfo.save();
+
+    res.status(200).json({ msg: '로그인 완료', accessToken });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류' });
   }
 };
 
 // social login
-
 exports.socialLogin = async (req, res) => {
   // request
   const { kakaoToken: ACCESS_TOKEN, nickname } = req.body;
@@ -92,8 +95,9 @@ exports.socialLogin = async (req, res) => {
       isSocial: true,
     });
 
-    const accessToken = socialUser.generateToken();
+    const { accessToken, refreshToken } = socialUser.generateToken();
 
+    socialUser.saveRefreshToken(refreshToken);
     await socialUser.save();
 
     res.status(200).send({ msg: '카카오 로그인 성공', accessToken });
@@ -102,6 +106,7 @@ exports.socialLogin = async (req, res) => {
   }
 };
 
+// regist
 exports.regist = async (req, res) => {
   const { userId, userPw, repeatPw, nickname } = req.body;
   const { location: profileImg, key: profileImgKey } = req.file;
