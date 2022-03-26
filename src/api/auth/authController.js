@@ -45,7 +45,8 @@ exports.kakaoCallback = async (req, res) => {
       return;
     }
 
-    const accessToken = userInfo.generateToken();
+    const { accessToken, refreshToken } = userInfo.generateToken();
+    await userInfo.saveRefreshToken(refreshToken);
 
     res.status(200).send({ accessToken });
   } catch (err) {
