@@ -39,6 +39,7 @@ userSchema.methods.generateToken = function () {
   const accessToken = jwt.sign(
     {
       nickname: this.nickname,
+      profileImg: this.profileImg,
     },
     process.env.JWT_SECRET_KEY,
     {
