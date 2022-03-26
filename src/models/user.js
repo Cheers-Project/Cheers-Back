@@ -63,6 +63,10 @@ userSchema.methods.saveRefreshToken = function (refreshToken) {
   this.refreshToken = refreshToken;
 };
 
+userSchema.methods.removeRefreshToken = function () {
+  this.refreshToken = '';
+};
+
 // document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
 // 아이디 확인
 userSchema.statics.checkUser = function (userId) {

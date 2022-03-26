@@ -3,7 +3,7 @@ const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
-const { login, socialLogin, regist } = require('./userController');
+const { login, socialLogin, logout, regist } = require('./userController');
 const s3 = require('../../config/s3');
 
 const router = express.Router();
@@ -25,6 +25,7 @@ const upload = multer({
 
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
+router.get('/logout', logout);
 router.post('/regist', upload.single('profileImg'), regist);
 
 module.exports = router;

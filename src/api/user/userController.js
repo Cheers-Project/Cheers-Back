@@ -1,6 +1,7 @@
 const User = require('../../models/user');
 const Joi = require('joi');
 const s3 = require('../../config/s3');
+const jwt = require('jsonwebtoken');
 const axios = require('axios').default;
 
 // login
@@ -103,6 +104,24 @@ exports.socialLogin = async (req, res) => {
     res.status(200).send({ msg: '카카오 로그인 성공', accessToken });
   } catch (e) {
     res.status(500).send({ msg: '카카오 로그인 실패' });
+  }
+};
+
+// logout
+exports.logout = async (req, res) => {
+  const { JWT_SECRET_KEY } = process.env;
+
+  const token = req.headers.authorization;
+  try {
+    const { nickname } = jwt.decode(token, JWT_SECRET_KEY);
+
+    const user = await User.checkNickname(nickname);
+
+    user.removeRefreshToken();
+
+    res.status(200).send({ msg: '로그아웃 성공' });
+  } catch (e) {
+    res.status(500).send({ msg: '로그아웃 실패' });
   }
 };
 
