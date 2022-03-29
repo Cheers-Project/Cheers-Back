@@ -3,7 +3,13 @@ const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
-const { login, socialLogin, logout, regist } = require('./userController');
+const {
+  login,
+  socialLogin,
+  logout,
+  regist,
+  getUser,
+} = require('./userController');
 const s3 = require('../../config/s3');
 
 const router = express.Router();
@@ -23,6 +29,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
 });
 
+router.get('/', getUser);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
 router.get('/logout', logout);
