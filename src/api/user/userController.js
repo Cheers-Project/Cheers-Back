@@ -4,6 +4,21 @@ const s3 = require('../../config/s3');
 const jwt = require('jsonwebtoken');
 const axios = require('axios').default;
 
+exports.getUser = async (req, res) => {
+  const { JWT_SECRET_KEY } = process.env;
+
+  if (req.headers.authorization !== 'null') {
+    const token = req.headers.authorization;
+
+    const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+    const user = await User.checkNickname(nickname);
+
+    res.status(200).send({ user });
+  } else {
+    res.status(200).send(null);
+  }
+};
+
 // login
 exports.login = async (req, res, next) => {
   // requset를 받아온다.
@@ -44,7 +59,7 @@ exports.login = async (req, res, next) => {
     userInfo.saveRefreshToken(refreshToken);
     await userInfo.save();
 
-    res.status(200).json({ msg: '로그인 완료', accessToken });
+    res.status(200).json({ msg: '로그인 완료', accessToken, userInfo });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류' });
   }
@@ -75,12 +90,12 @@ exports.socialLogin = async (req, res) => {
     const {
       data: {
         id: kakaoId,
-        kakao_account: { profile: userInfo },
+        kakao_account: { profile: socialInfo },
       },
     } = kakaoInfo;
 
     const userId = `${kakaoId}@lemon.com`;
-    const { profile_image_url: profileImg } = userInfo;
+    const { profile_image_url: profileImg } = socialInfo;
 
     const validateUser = await User.checkUser(userId);
 
@@ -89,19 +104,19 @@ exports.socialLogin = async (req, res) => {
       return;
     }
 
-    const socialUser = new User({
+    const userInfo = new User({
       userId,
       nickname,
       profileImg,
       isSocial: true,
     });
 
-    const { accessToken, refreshToken } = socialUser.generateToken();
+    const { accessToken, refreshToken } = userInfo.generateToken();
 
-    socialUser.saveRefreshToken(refreshToken);
-    await socialUser.save();
+    userInfo.saveRefreshToken(refreshToken);
+    await userInfo.save();
 
-    res.status(200).send({ msg: '카카오 로그인 성공', accessToken });
+    res.status(200).send({ msg: '카카오 로그인 성공', accessToken, userInfo });
   } catch (e) {
     res.status(500).send({ msg: '카카오 로그인 실패' });
   }
