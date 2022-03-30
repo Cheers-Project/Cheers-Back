@@ -1,6 +1,6 @@
 const User = require('../../models/user');
 const Joi = require('joi');
-const s3 = require('../../config/s3');
+
 const jwt = require('jsonwebtoken');
 const axios = require('axios').default;
 
@@ -148,7 +148,6 @@ exports.logout = async (req, res) => {
 // regist
 exports.regist = async (req, res) => {
   const { userId, userPw, repeatPw, nickname } = req.body;
-  const { location: profileImg, key: profileImgKey } = req.file;
 
   const schema = Joi.object({
     userId: Joi.string()
@@ -161,7 +160,6 @@ exports.regist = async (req, res) => {
       .required(),
     repeatPw: Joi.ref('userPw'),
     nickname: Joi.string().min(2).max(10).required(),
-    profileImg: Joi.string(),
   });
 
   const validatedResult = schema.validate({
@@ -169,62 +167,44 @@ exports.regist = async (req, res) => {
     userPw,
     repeatPw,
     nickname,
-    profileImg,
   });
 
+  // 필수 입력 항목 예외처리
   if (validatedResult.error) {
-    s3.deleteObject(
-      {
-        Bucket: 'lemonalcohol-s3',
-        Key: `${profileImgKey}`,
-      },
-      (err, data) => {
-        console.log(err, data);
-      },
-    );
     res.status(400).send({ error: validatedResult.error });
     return;
   }
 
   try {
+    // 사용중인 아이디 예외 처리
     const existId = await User.checkUser(userId);
 
     if (existId) {
-      s3.deleteObject(
-        {
-          Bucket: 'lemonalcohol-s3',
-          Key: `${profileImgKey}`,
-        },
-        (err, data) => {
-          console.log(err, data);
-        },
-      );
       res.status(400).send({ msg: '사용중인 아이디 입니다.' });
       return;
     }
 
+    // 사용중인 닉네임 예외처리
     const existNickname = await User.checkNickname(nickname);
 
     if (existNickname) {
-      s3.deleteObject(
-        {
-          Bucket: 'lemonalcohol-s3',
-          Key: `${profileImgKey}`,
-        },
-        (err, data) => {
-          console.log(err, data);
-        },
-      );
       res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
       return;
     }
 
+    // 유저 모델 생성
     const user = new User({
       userId,
       userPw,
       nickname,
-      profileImg,
     });
+
+    // 프로필 이미지가 있을 경우 추가 데이터 저장
+    if (req.file) {
+      const { location: profileImg, key: profileImgKey } = req.file;
+
+      await user.saveProfileImg(profileImg, profileImgKey);
+    }
 
     await user.encryptPassword(userPw);
     await user.save();
