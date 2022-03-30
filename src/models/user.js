@@ -11,6 +11,7 @@ const userSchema = new Schema({
   nickname: String,
   isSocial: { default: false, type: Boolean },
   profileImg: String,
+  profileImgKey: String,
   refreshToken: String,
 });
 
@@ -65,6 +66,11 @@ userSchema.methods.saveRefreshToken = function (refreshToken) {
 
 userSchema.methods.removeRefreshToken = function () {
   this.refreshToken = '';
+};
+
+userSchema.methods.saveProfileImg = function (profileImg, profileImgKey) {
+  this.profileImg = profileImg;
+  this.profileImgKey = profileImgKey;
 };
 
 // document(문서)가 필요하지 않거나 존재하지 않는 경우 정적 메서드 사용
