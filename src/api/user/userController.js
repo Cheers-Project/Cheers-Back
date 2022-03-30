@@ -5,16 +5,18 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios').default;
 
 exports.fetchUser = async (req, res) => {
+  console.log('유저 정보');
   const { JWT_SECRET_KEY } = process.env;
 
-  if (req.headers.authorization) {
+  try {
     const token = req.headers.authorization;
 
     const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
     const userInfo = await User.checkNickname(nickname);
 
     res.status(200).send({ userInfo });
-  } else {
+  } catch (e) {
+    // 토큰이 없거나 유효하지 않은 경우 유저 정보는 null 반환
     res.status(200).send(null);
   }
 };
