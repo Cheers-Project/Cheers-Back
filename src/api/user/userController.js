@@ -29,12 +29,12 @@ exports.login = async (req, res, next) => {
 
   // request 아이디가 없을 때
   if (!userId) {
-    res.status(401).send({ msg: '아이디를 입력해 주세요' });
+    res.status(400).send({ msg: '아이디를 입력해 주세요' });
     return;
   }
   // request 비밀번호 없을 때
   if (!userPw) {
-    res.status(401).send({ msg: '비밀번호를 입력해 주세요' });
+    res.status(400).send({ msg: '비밀번호를 입력해 주세요' });
     return;
   }
 
@@ -53,7 +53,7 @@ exports.login = async (req, res, next) => {
     const checkPw = await userInfo.validatePw(userPw);
 
     if (!checkPw) {
-      res.status(401).send({ msg: '비밀번호가 일치 하지 않습니다.' });
+      res.status(400).send({ msg: '비밀번호가 일치 하지 않습니다.' });
       return;
     }
 
