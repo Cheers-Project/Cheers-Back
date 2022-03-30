@@ -4,16 +4,16 @@ const s3 = require('../../config/s3');
 const jwt = require('jsonwebtoken');
 const axios = require('axios').default;
 
-exports.getUser = async (req, res) => {
+exports.fetchUser = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
 
-  if (req.headers.authorization !== 'null') {
+  if (req.headers.authorization) {
     const token = req.headers.authorization;
 
     const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
-    const user = await User.checkNickname(nickname);
+    const userInfo = await User.checkNickname(nickname);
 
-    res.status(200).send({ user });
+    res.status(200).send({ userInfo });
   } else {
     res.status(200).send(null);
   }
@@ -21,6 +21,7 @@ exports.getUser = async (req, res) => {
 
 // login
 exports.login = async (req, res, next) => {
+  console.log('로그인');
   // requset를 받아온다.
   const { userId, userPw } = req.body;
 
@@ -67,6 +68,7 @@ exports.login = async (req, res, next) => {
 
 // social login
 exports.socialLogin = async (req, res) => {
+  console.log('소셜 로그인');
   // request
   const { kakaoToken: ACCESS_TOKEN, nickname } = req.body;
 
@@ -124,6 +126,7 @@ exports.socialLogin = async (req, res) => {
 
 // logout
 exports.logout = async (req, res) => {
+  console.log('로그아웃');
   const { JWT_SECRET_KEY } = process.env;
 
   const token = req.headers.authorization;
