@@ -8,7 +8,7 @@ const {
   socialLogin,
   logout,
   regist,
-  getUser,
+  fetchUser,
 } = require('./userController');
 const s3 = require('../../config/s3');
 
@@ -29,7 +29,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
 });
 
-router.get('/', getUser);
+router.get('/', fetchUser);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
 router.get('/logout', logout);
