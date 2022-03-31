@@ -216,7 +216,7 @@ exports.regist = async (req, res) => {
   }
 };
 
-exports.profile = async (req, res) => {
+exports.updateProfileImg = async (req, res) => {
   console.log('프로필 이미지 변경');
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
@@ -226,12 +226,6 @@ exports.profile = async (req, res) => {
 
   try {
     const oldUser = await User.findByNickname(nickname);
-
-    const userInfo = await User.findOneAndUpdate(
-      { nickname },
-      { profileImg, profileImgKey },
-      { new: true },
-    ).exec();
 
     // 기존 유저 프로필 이미지 s3에서 제거
     if (oldUser.profileImgKey) {
@@ -245,6 +239,54 @@ exports.profile = async (req, res) => {
         },
       );
     }
+
+    // 새 프로필 이미지 저장
+    const userInfo = await User.findOneAndUpdate(
+      { nickname },
+      { profileImg, profileImgKey },
+      { new: true },
+    ).exec();
+
+    res.status(200).send({ userInfo });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
+exports.removeProfileImg = async (req, res) => {
+  console.log('프로필 이미지 제거');
+  const { JWT_SECRET_KEY, DEFAULT_PROFILE_IMG } = process.env;
+  const token = req.headers.authorization;
+
+  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+
+  try {
+    const oldUser = await User.findByNickname(nickname);
+
+    // s3에 저장된 이미지라면 s3에서 제거
+    if (oldUser.profileImgKey) {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${oldUser.profileImgKey}`,
+        },
+        (err, data) => {
+          console.log(data);
+        },
+      );
+    }
+
+    // 프로필 이미지 기본 이미지로 변경
+    const userInfo = await User.findOneAndUpdate(
+      { nickname },
+      {
+        profileImg: `${DEFAULT_PROFILE_IMG}`,
+        $unset: { profileImgKey: '' },
+      },
+      { new: true },
+    ).exec();
+
+    console.log(userInfo);
 
     res.status(200).send({ userInfo });
   } catch (e) {

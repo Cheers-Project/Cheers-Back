@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const { Schema } = mongoose;
 
+const { DEFAULT_PROFILE_IMG } = process.env;
+
 // 스키마
 const userSchema = new Schema({
   userId: String,
@@ -11,11 +13,10 @@ const userSchema = new Schema({
   nickname: String,
   isSocial: { default: false, type: Boolean },
   profileImg: {
-    default: `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
+    default: `${DEFAULT_PROFILE_IMG}`,
     type: String,
   },
   profileImgKey: String,
-
   refreshToken: String,
 });
 

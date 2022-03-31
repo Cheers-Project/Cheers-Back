@@ -10,7 +10,8 @@ const {
   logout,
   regist,
   fetchUser,
-  profile,
+  updateProfileImg,
+  removeProfileImg,
 } = require('./userController');
 const s3 = require('../../config/s3');
 
@@ -36,6 +37,12 @@ router.get('/logout', logout);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
 router.post('/regist', regist);
-router.post('/profile', jwtMiddleware, upload.single('profileImg'), profile);
+router.post(
+  '/profile',
+  jwtMiddleware,
+  upload.single('profileImg'),
+  updateProfileImg,
+);
+router.delete('/profile', jwtMiddleware, removeProfileImg);
 
 module.exports = router;
