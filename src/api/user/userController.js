@@ -74,6 +74,11 @@ exports.socialLogin = async (req, res) => {
   // request
   const { kakaoToken: ACCESS_TOKEN, nickname } = req.body;
 
+  if (!nickname) {
+    res.status(400).send({ msg: '닉네임을 입력해주세요' });
+    return;
+  }
+
   // 닉네임 중복 확인
   const existNickname = await User.checkNickname(nickname);
 
