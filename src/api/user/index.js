@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
+const jwtMiddleware = require('../../middleware/jwtMiddleware');
 
 const {
   login,
@@ -9,6 +10,7 @@ const {
   logout,
   regist,
   fetchUser,
+  profile,
 } = require('./userController');
 const s3 = require('../../config/s3');
 
@@ -30,9 +32,10 @@ const upload = multer({
 });
 
 router.get('/', fetchUser);
+router.get('/logout', logout);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
-router.get('/logout', logout);
-router.post('/regist', upload.single('profileImg'), regist);
+router.post('/regist', regist);
+router.post('/profile', jwtMiddleware, upload.single('profileImg'), profile);
 
 module.exports = router;
