@@ -204,13 +204,6 @@ exports.regist = async (req, res) => {
       nickname,
     });
 
-    // 프로필 이미지가 있을 경우 추가 데이터 저장
-    if (req.file) {
-      const { location: profileImg, key: profileImgKey } = req.file;
-
-      await user.saveProfileImg(profileImg, profileImgKey);
-    }
-
     await user.encryptPassword(userPw);
     await user.save();
 
@@ -220,4 +213,9 @@ exports.regist = async (req, res) => {
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
+};
+
+exports.profile = (req, res) => {
+  console.log('프로필 변경');
+  console.log(req.file);
 };
