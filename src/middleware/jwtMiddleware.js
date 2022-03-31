@@ -17,7 +17,7 @@ const verifyRefreshToken = async (accessToken) => {
 
   try {
     const { nickname } = jwt.decode(accessToken, JWT_SECRET_KEY);
-    const user = await User.checkNickname(nickname);
+    const user = await User.findByNickname(nickname);
 
     jwt.verify(user.refreshToken, JWT_SECRET_KEY);
 

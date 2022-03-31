@@ -38,7 +38,7 @@ exports.kakaoCallback = async (req, res) => {
 
     const userId = `${kakaoInfo.id}@lemon.com`;
 
-    const userInfo = await User.checkUser(userId);
+    const userInfo = await User.findByUserId(userId);
 
     if (!userInfo) {
       res.send({ kakaoToken: ACCESS_TOKEN });

@@ -2,6 +2,7 @@ const User = require('../../models/user');
 const Joi = require('joi');
 
 const jwt = require('jsonwebtoken');
+const s3 = require('../../config/s3');
 const axios = require('axios').default;
 
 exports.fetchUser = async (req, res) => {
@@ -12,7 +13,7 @@ exports.fetchUser = async (req, res) => {
     const token = req.headers.authorization;
 
     const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
-    const userInfo = await User.checkNickname(nickname);
+    const userInfo = await User.findByNickname(nickname);
 
     res.status(200).send({ userInfo });
   } catch (e) {
@@ -40,7 +41,7 @@ exports.login = async (req, res, next) => {
 
   try {
     // 유저 아이디로 유효성 검사
-    const userInfo = await User.checkUser(userId);
+    const userInfo = await User.findByUserId(userId);
     // request 정보가 DB에 없을 때
     if (!userInfo) {
       res
@@ -80,7 +81,7 @@ exports.socialLogin = async (req, res) => {
   }
 
   // 닉네임 중복 확인
-  const existNickname = await User.checkNickname(nickname);
+  const existNickname = await User.findByNickname(nickname);
 
   if (existNickname) {
     res.status(400).send({ msg: '사용중인 닉네임입니다.' });
@@ -106,7 +107,7 @@ exports.socialLogin = async (req, res) => {
     const userId = `${kakaoId}@lemon.com`;
     const { profile_image_url: profileImg } = socialInfo;
 
-    const validateUser = await User.checkUser(userId);
+    const validateUser = await User.findByUserId(userId);
 
     if (validateUser) {
       res.status(400).send({ msg: '이미 카카오 로그인을 했었습니다.' });
@@ -140,7 +141,7 @@ exports.logout = async (req, res) => {
   try {
     const { nickname } = jwt.decode(token, JWT_SECRET_KEY);
 
-    const user = await User.checkNickname(nickname);
+    const user = await User.findByNickname(nickname);
 
     user.removeRefreshToken();
 
@@ -182,7 +183,7 @@ exports.regist = async (req, res) => {
 
   try {
     // 사용중인 아이디 예외 처리
-    const existId = await User.checkUser(userId);
+    const existId = await User.findByUserId(userId);
 
     if (existId) {
       res.status(400).send({ msg: '사용중인 아이디 입니다.' });
@@ -190,7 +191,7 @@ exports.regist = async (req, res) => {
     }
 
     // 사용중인 닉네임 예외처리
-    const existNickname = await User.checkNickname(nickname);
+    const existNickname = await User.findByNickname(nickname);
 
     if (existNickname) {
       res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
@@ -215,7 +216,80 @@ exports.regist = async (req, res) => {
   }
 };
 
-exports.profile = (req, res) => {
-  console.log('프로필 변경');
-  console.log(req.file);
+exports.updateProfileImg = async (req, res) => {
+  console.log('프로필 이미지 변경');
+  const { JWT_SECRET_KEY } = process.env;
+  const token = req.headers.authorization;
+  const { location: profileImg, key: profileImgKey } = req.file;
+
+  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+
+  try {
+    const oldUser = await User.findByNickname(nickname);
+
+    // 기존 유저 프로필 이미지 s3에서 제거
+    if (oldUser.profileImgKey) {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${oldUser.profileImgKey}`,
+        },
+        (err, data) => {
+          console.log(err);
+        },
+      );
+    }
+
+    // 새 프로필 이미지 저장
+    const userInfo = await User.findOneAndUpdate(
+      { nickname },
+      { profileImg, profileImgKey },
+      { new: true },
+    ).exec();
+
+    res.status(200).send({ userInfo });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
+exports.removeProfileImg = async (req, res) => {
+  console.log('프로필 이미지 제거');
+  const { JWT_SECRET_KEY, DEFAULT_PROFILE_IMG } = process.env;
+  const token = req.headers.authorization;
+
+  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+
+  try {
+    const oldUser = await User.findByNickname(nickname);
+
+    // s3에 저장된 이미지라면 s3에서 제거
+    if (oldUser.profileImgKey) {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${oldUser.profileImgKey}`,
+        },
+        (err, data) => {
+          console.log(data);
+        },
+      );
+    }
+
+    // 프로필 이미지 기본 이미지로 변경
+    const userInfo = await User.findOneAndUpdate(
+      { nickname },
+      {
+        profileImg: `${DEFAULT_PROFILE_IMG}`,
+        $unset: { profileImgKey: '' },
+      },
+      { new: true },
+    ).exec();
+
+    console.log(userInfo);
+
+    res.status(200).send({ userInfo });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
 };
