@@ -10,8 +10,12 @@ const userSchema = new Schema({
   userPw: String,
   nickname: String,
   isSocial: { default: false, type: Boolean },
-  profileImg: String,
+  profileImg: {
+    default: `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
+    type: String,
+  },
   profileImgKey: String,
+
   refreshToken: String,
 });
 
