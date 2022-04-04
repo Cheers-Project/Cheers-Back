@@ -35,6 +35,7 @@ userSchema.methods.validatePw = async function (userPw) {
 userSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.userPw;
+  delete data.refreshToken;
 
   return data;
 };
@@ -49,17 +50,19 @@ userSchema.methods.generateToken = function () {
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: '10m',
+      expiresIn: '1m',
     },
   );
 
   const refreshToken = jwt.sign(
     {
+      _id: this._id,
       nickname: this.nickname,
+      profileImg: this.profileImg,
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: '1d',
+      expiresIn: '7d',
     },
   );
   return { accessToken, refreshToken };
