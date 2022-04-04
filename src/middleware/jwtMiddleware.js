@@ -16,11 +16,11 @@ const verifyRefreshToken = async (accessToken) => {
   const { JWT_SECRET_KEY } = process.env;
 
   try {
-    const { nickname } = jwt.decode(accessToken, JWT_SECRET_KEY);
-    const user = await User.findByNickname(nickname);
+    const { _id } = jwt.decode(accessToken, JWT_SECRET_KEY);
+
+    const user = await User.findById({ _id });
 
     jwt.verify(user.refreshToken, JWT_SECRET_KEY);
-
     return user;
   } catch (e) {
     return null;
