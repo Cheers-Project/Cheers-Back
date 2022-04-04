@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { Schema } = mongoose;
-
 const { DEFAULT_PROFILE_IMG } = process.env;
 
 // 스키마
@@ -13,7 +12,7 @@ const userSchema = new Schema({
   nickname: String,
   isSocial: { default: false, type: Boolean },
   profileImg: {
-    default: `${DEFAULT_PROFILE_IMG}`,
+    default: `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
     type: String,
   },
   profileImgKey: String,
@@ -44,6 +43,7 @@ userSchema.methods.serialize = function () {
 userSchema.methods.generateToken = function () {
   const accessToken = jwt.sign(
     {
+      _id: this._id,
       nickname: this.nickname,
       profileImg: this.profileImg,
     },
