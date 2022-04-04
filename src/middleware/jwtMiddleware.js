@@ -42,6 +42,7 @@ const jwtMiddleware = async (req, res, next) => {
       const { accessToken, refreshToken } = validUser.generateToken();
 
       await validUser.saveRefreshToken(refreshToken);
+      validUser.save();
 
       req.headers.authorization = accessToken;
       next();

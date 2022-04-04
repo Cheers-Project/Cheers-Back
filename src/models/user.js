@@ -56,11 +56,13 @@ userSchema.methods.generateToken = function () {
 
   const refreshToken = jwt.sign(
     {
+      _id: this._id,
       nickname: this.nickname,
+      profileImg: this.profileImg,
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: '1d',
+      expiresIn: '7d',
     },
   );
   return { accessToken, refreshToken };

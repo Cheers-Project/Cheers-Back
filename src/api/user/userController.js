@@ -161,6 +161,7 @@ exports.logout = async (req, res) => {
     const user = await User.findByNickname(nickname);
 
     user.removeRefreshToken();
+    user.save();
 
     res.status(200).send({ msg: '로그아웃 성공' });
   } catch (e) {
