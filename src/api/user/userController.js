@@ -17,6 +17,18 @@ exports.fetchUser = async (req, res) => {
 
     res.status(200).send({ userInfo });
   } catch (e) {
+    // 액세스 토큰이 만료라면 재발급 후 유저 정보 응답
+    if (e.name === 'TokenExpiredError') {
+      const token = req.headers.authorization;
+      const { nickname } = jwt.decode(token, JWT_SECRET_KEY);
+
+      const userInfo = await User.findByNickname(nickname);
+
+      const { accessToken, refreshToken } = userInfo.generateToken();
+      await userInfo.saveRefreshToken(refreshToken);
+
+      return res.status(200).send({ userInfo, accessToken });
+    }
     // 토큰이 없거나 유효하지 않은 경우 유저 정보는 null 반환
     res.status(200).send(null);
   }
