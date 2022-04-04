@@ -235,7 +235,6 @@ exports.regist = async (req, res) => {
 };
 
 exports.updateProfileImg = async (req, res) => {
-  console.log('프로필 이미지 변경');
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
   const { location: profileImg, key: profileImgKey } = req.file;
@@ -317,7 +316,8 @@ exports.removeProfileImg = async (req, res) => {
 // 유저 정보 수정
 exports.updateInfo = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
-  const { _id } = jwt.verify(req.headers.authorization, JWT_SECRET_KEY);
+  const token = req.headers.authorization;
+  const { _id } = jwt.verify(token, JWT_SECRET_KEY);
 
   try {
     // 닉네임 변경일 경우
@@ -334,9 +334,14 @@ exports.updateInfo = async (req, res) => {
       new: true,
     });
 
+    // 새 정보로 토큰을 재발급
+    const { accessToken, refreshToken } = user.generateToken();
+    user.saveRefreshToken(refreshToken);
+    await user.save();
+
     const userInfo = user.serialize();
 
-    res.status(200).send({ userInfo });
+    res.status(200).send({ userInfo, accessToken });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
