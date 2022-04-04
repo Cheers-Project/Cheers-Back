@@ -35,6 +35,7 @@ userSchema.methods.validatePw = async function (userPw) {
 userSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.userPw;
+  delete data.refreshToken;
 
   return data;
 };
@@ -49,7 +50,7 @@ userSchema.methods.generateToken = function () {
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: '10m',
+      expiresIn: '1m',
     },
   );
 

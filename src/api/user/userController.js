@@ -13,7 +13,8 @@ exports.fetchUser = async (req, res) => {
     const token = req.headers.authorization;
 
     const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
-    const userInfo = await User.findByNickname(nickname);
+    const user = await User.findByNickname(nickname);
+    const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
   } catch (e) {
@@ -22,10 +23,12 @@ exports.fetchUser = async (req, res) => {
       const token = req.headers.authorization;
       const { nickname } = jwt.decode(token, JWT_SECRET_KEY);
 
-      const userInfo = await User.findByNickname(nickname);
+      const user = await User.findByNickname(nickname);
 
-      const { accessToken, refreshToken } = userInfo.generateToken();
-      await userInfo.saveRefreshToken(refreshToken);
+      const { accessToken, refreshToken } = user.generateToken();
+
+      await user.saveRefreshToken(refreshToken);
+      const userInfo = user.serialize();
 
       return res.status(200).send({ userInfo, accessToken });
     }
@@ -53,9 +56,9 @@ exports.login = async (req, res, next) => {
 
   try {
     // 유저 아이디로 유효성 검사
-    const userInfo = await User.findByUserId(userId);
+    const user = await User.findByUserId(userId);
     // request 정보가 DB에 없을 때
-    if (!userInfo) {
+    if (!user) {
       res
         .status(400)
         .send({ msg: '가입하지 않은 회원입니다. 회원가입을 해주세요' });
@@ -63,17 +66,18 @@ exports.login = async (req, res, next) => {
     }
     // 비밀번호 유효성 검사
     // request 비밀번호화 DB 비밀번호가 다를 때
-    const checkPw = await userInfo.validatePw(userPw);
+    const checkPw = await user.validatePw(userPw);
 
     if (!checkPw) {
       res.status(400).send({ msg: '비밀번호가 일치 하지 않습니다.' });
       return;
     }
 
-    const { accessToken, refreshToken } = userInfo.generateToken();
+    const { accessToken, refreshToken } = user.generateToken();
 
-    userInfo.saveRefreshToken(refreshToken);
-    await userInfo.save();
+    user.saveRefreshToken(refreshToken);
+    await user.save();
+    const userInfo = user.serialize();
 
     res.status(200).json({ msg: '로그인 완료', accessToken, userInfo });
   } catch (e) {
@@ -126,17 +130,18 @@ exports.socialLogin = async (req, res) => {
       return;
     }
 
-    const userInfo = new User({
+    const user = new User({
       userId,
       nickname,
       profileImg,
       isSocial: true,
     });
 
-    const { accessToken, refreshToken } = userInfo.generateToken();
+    const { accessToken, refreshToken } = user.generateToken();
 
-    userInfo.saveRefreshToken(refreshToken);
-    await userInfo.save();
+    user.saveRefreshToken(refreshToken);
+    await user.save();
+    const userInfo = user.serialize();
 
     res.status(200).send({ msg: '카카오 로그인 성공', accessToken, userInfo });
   } catch (e) {
@@ -220,9 +225,9 @@ exports.regist = async (req, res) => {
     await user.encryptPassword(userPw);
     await user.save();
 
-    const data = user.serialize();
+    const userInfo = user.serialize();
 
-    res.status(200).send({ data, msg: '회원가입 성공' });
+    res.status(200).send({ userInfo, msg: '회원가입 성공' });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
@@ -253,11 +258,13 @@ exports.updateProfileImg = async (req, res) => {
     }
 
     // 새 프로필 이미지 저장
-    const userInfo = await User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       { nickname },
       { profileImg, profileImgKey },
       { new: true },
     ).exec();
+
+    const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
   } catch (e) {
@@ -289,7 +296,7 @@ exports.removeProfileImg = async (req, res) => {
     }
 
     // 프로필 이미지 기본 이미지로 변경
-    const userInfo = await User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       { nickname },
       {
         profileImg: `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
@@ -298,7 +305,7 @@ exports.removeProfileImg = async (req, res) => {
       { new: true },
     ).exec();
 
-    console.log(userInfo);
+    const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
   } catch (e) {
@@ -322,9 +329,11 @@ exports.updateInfo = async (req, res) => {
       }
     }
 
-    const userInfo = await User.findByIdAndUpdate({ _id }, req.body, {
+    const user = await User.findByIdAndUpdate({ _id }, req.body, {
       new: true,
     });
+
+    const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
   } catch (e) {
