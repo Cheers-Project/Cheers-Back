@@ -12,6 +12,7 @@ const {
   fetchUser,
   updateProfileImg,
   removeProfileImg,
+  updateInfo,
 } = require('./userController');
 const s3 = require('../../config/s3');
 
@@ -34,6 +35,7 @@ const upload = multer({
 
 router.get('/', fetchUser);
 router.get('/logout', logout);
+router.patch('/', jwtMiddleware, updateInfo);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
 router.post('/regist', regist);
