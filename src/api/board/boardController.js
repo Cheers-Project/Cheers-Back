@@ -23,3 +23,8 @@ exports.writeBoard = async (req, res) => {
     res.status(500).send({ msg: '게시물 작성 실패' });
   }
 };
+
+exports.uploadImage = async (req, res) => {
+  console.log(req.file);
+  res.send({ imgUrl: req.file.location });
+};
