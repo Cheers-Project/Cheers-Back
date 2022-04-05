@@ -16,15 +16,15 @@ const boardSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  likeCnt: {
+  like: {
     type: Number,
     default: 0,
   },
-  commentCnt: {
+  comment: {
     type: Number,
     default: 0,
   },
-  visitCnt: {
+  visit: {
     type: Number,
     default: 0,
   },
