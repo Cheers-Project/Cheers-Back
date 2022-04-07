@@ -10,21 +10,25 @@ const boardSchema = new Schema({
     type: String,
   },
   writer: {
-    type: String,
+    type: Object,
   },
   createdDate: {
     type: Date,
     default: Date.now,
   },
-  likeCnt: {
+  modifiedDate: {
+    type: Date,
+    default: Date.now,
+  },
+  like: {
     type: Number,
     default: 0,
   },
-  commentCnt: {
+  comment: {
     type: Number,
     default: 0,
   },
-  visitCnt: {
+  visit: {
     type: Number,
     default: 0,
   },

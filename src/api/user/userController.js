@@ -4,6 +4,7 @@ const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const s3 = require('../../config/s3');
 const axios = require('axios').default;
+const Board = require('../../models/board');
 
 exports.fetchUser = async (req, res) => {
   console.log('유저 정보');
@@ -264,6 +265,13 @@ exports.updateProfileImg = async (req, res) => {
       { new: true },
     ).exec();
 
+    await Board.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      { 'writer.profileImg': profileImg },
+    ).exec();
+
     const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
@@ -305,6 +313,15 @@ exports.removeProfileImg = async (req, res) => {
       { new: true },
     ).exec();
 
+    await Board.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      {
+        'writer.profileImg': `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
+      },
+    ).exec();
+
     const userInfo = user.serialize();
 
     res.status(200).send({ userInfo });
@@ -317,17 +334,25 @@ exports.removeProfileImg = async (req, res) => {
 exports.updateInfo = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
-  const { _id } = jwt.verify(token, JWT_SECRET_KEY);
+  const { _id, nickname } = jwt.verify(token, JWT_SECRET_KEY);
 
   try {
     // 닉네임 변경일 경우
     if (req.body.nickname) {
       const existNickname = await User.findByNickname(req.body.nickname);
+
       // 이미 존재하는 닉네임 예외 처리
       if (existNickname) {
         res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
         return;
       }
+
+      await Board.updateMany(
+        {
+          'writer.nickname': nickname,
+        },
+        { 'writer.nickname': req.body.nickname },
+      ).exec();
     }
 
     const user = await User.findByIdAndUpdate({ _id }, req.body, {

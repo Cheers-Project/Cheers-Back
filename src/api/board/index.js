@@ -5,7 +5,7 @@ const path = require('path');
 
 const s3 = require('../../config/s3');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
-const { writeBoard, uploadImage } = require('./boardController');
+const { getBoard, writeBoard, uploadImage } = require('./boardController');
 
 const router = express.Router();
 
@@ -24,6 +24,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
 });
 
+router.get('/', getBoard);
 router.post('/', jwtMiddleware, writeBoard);
 router.post('/image', upload.single('image'), uploadImage);
 
