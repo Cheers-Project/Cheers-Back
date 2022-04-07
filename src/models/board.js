@@ -10,9 +10,13 @@ const boardSchema = new Schema({
     type: String,
   },
   writer: {
-    type: String,
+    type: Object,
   },
   createdDate: {
+    type: Date,
+    default: Date.now,
+  },
+  modifiedDate: {
     type: Date,
     default: Date.now,
   },
