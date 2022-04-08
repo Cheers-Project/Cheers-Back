@@ -2,6 +2,7 @@ const Board = require('../../models/board');
 const User = require('../../models/user');
 
 const jwt = require('jsonwebtoken');
+const pagination = require('../../utils/pagination');
 
 exports.writeBoard = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
@@ -34,7 +35,37 @@ exports.uploadImage = async (req, res) => {
 
 exports.getBoard = async (req, res) => {
   console.log('게시물 요청');
-  const boards = await Board.find({});
+  const { sort, page } = req.query;
 
-  res.send({ boards });
+  try {
+    const totalBoard = await Board.countDocuments({});
+
+    const { maxPage, skipBoard, maxBoard } = pagination(page, totalBoard);
+
+    if (sort === 'recent') {
+      const boards = await Board.find({})
+        .skip(skipBoard)
+        .sort({ createdDate: -1 })
+        .limit(maxBoard);
+      return res.status(200).send({ boards, maxPage });
+    }
+
+    if (sort === 'like') {
+      const boards = await Board.find({})
+        .skip(skipBoard)
+        .sort({ like: -1 })
+        .limit(maxBoard);
+      return res.status(200).send({ boards });
+    }
+
+    if (sort === 'view') {
+      const boards = await Board.find({})
+        .skip(skipBoard)
+        .sort({ visit: -1 })
+        .limit(maxBoard);
+      return res.status(200).send({ boards });
+    }
+  } catch (e) {
+    console.log(e);
+  }
 };
