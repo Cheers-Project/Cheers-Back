@@ -19,7 +19,9 @@ const meetingSchema = new Schema({
   meetingDate: {
     type: String,
   },
-
+  meetingTime: {
+    type: String,
+  },
   totalNumber: {
     type: String,
   },
@@ -27,11 +29,12 @@ const meetingSchema = new Schema({
     type: [String],
   },
   location: {
-    name: String,
     type: {
       type: String,
       default: 'Point',
     },
+    placeName: String,
+    addressName: String,
     coordinates: [Number],
   },
 });
