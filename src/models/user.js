@@ -50,7 +50,7 @@ userSchema.methods.generateToken = function () {
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: '1m',
+      expiresIn: '20m',
     },
   );
 
