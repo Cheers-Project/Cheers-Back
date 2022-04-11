@@ -40,14 +40,17 @@ exports.getBoard = async (req, res) => {
   try {
     const totalBoard = await Board.countDocuments({});
 
-    const { maxPage, skipBoard, maxBoard } = pagination(page, totalBoard);
+    const { maxPage, skipBoard, maxBoard, pageNums } = pagination(
+      page,
+      totalBoard,
+    );
 
     if (sort === 'recent') {
       const boards = await Board.find({})
         .skip(skipBoard)
         .sort({ createdDate: -1 })
         .limit(maxBoard);
-      return res.status(200).send({ boards, maxPage });
+      return res.status(200).send({ boards, maxPage, page, pageNums });
     }
 
     if (sort === 'like') {
@@ -55,7 +58,7 @@ exports.getBoard = async (req, res) => {
         .skip(skipBoard)
         .sort({ like: -1 })
         .limit(maxBoard);
-      return res.status(200).send({ boards });
+      return res.status(200).send({ boards, maxPage, page, pageNums });
     }
 
     if (sort === 'view') {
@@ -63,8 +66,21 @@ exports.getBoard = async (req, res) => {
         .skip(skipBoard)
         .sort({ visit: -1 })
         .limit(maxBoard);
-      return res.status(200).send({ boards });
+      return res.status(200).send({ boards, maxPage, page, pageNums });
     }
+  } catch (e) {
+    return res.status(500).send({ msg: '게시물 불러오기 실패' });
+  }
+};
+
+exports.getBoardById = async (req, res) => {
+  console.log(req.params);
+  const { id } = req.params;
+  try {
+    const board = await Board.findById(id);
+    console.log(board);
+
+    return res.status(200).send({ board });
   } catch (e) {
     console.log(e);
   }
