@@ -1,13 +1,21 @@
 const pagination = (page, totalBoard) => {
   const maxBoard = 10;
-  const viewNumber = 5;
-  // 페이지 갯수 구하기
+  let currPage = parseInt(page);
+  const viewPage = 5;
   const maxPage = Math.ceil(totalBoard / maxBoard);
-
-  // 스킵할 보드 갯수 구하기
   const skipBoard = maxBoard * (page - 1);
 
-  return { maxPage, skipBoard, maxBoard };
+  if (currPage > maxPage) {
+    currPage = maxPage;
+  }
+
+  const startPage = Math.floor((currPage - 1) / viewPage) * viewPage + 1;
+
+  const pageNums = Array(viewPage)
+    .fill()
+    .map((_, i) => i + startPage);
+
+  return { maxPage, skipBoard, maxBoard, pageNums };
 };
 
 module.exports = pagination;
