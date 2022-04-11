@@ -5,7 +5,12 @@ const path = require('path');
 
 const s3 = require('../../config/s3');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
-const { getBoard, writeBoard, uploadImage } = require('./boardController');
+const {
+  getBoard,
+  writeBoard,
+  uploadImage,
+  getBoardById,
+} = require('./boardController');
 
 const router = express.Router();
 
@@ -25,6 +30,7 @@ const upload = multer({
 });
 
 router.get('/', getBoard);
+router.get('/:id', getBoardById);
 router.post('/', jwtMiddleware, writeBoard);
 router.post('/image', upload.single('image'), uploadImage);
 
