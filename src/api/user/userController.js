@@ -1,10 +1,8 @@
-const User = require('../../models/user');
 const Joi = require('joi');
-
 const jwt = require('jsonwebtoken');
-const s3 = require('../../config/s3');
 const axios = require('axios').default;
-const Board = require('../../models/board');
+
+const User = require('../../models/user');
 
 exports.fetchUser = async (req, res) => {
   console.log('유저 정보');
@@ -230,143 +228,6 @@ exports.regist = async (req, res) => {
     const userInfo = user.serialize();
 
     res.status(200).send({ userInfo, msg: '회원가입 성공' });
-  } catch (e) {
-    res.status(500).send({ msg: '서버 오류', e });
-  }
-};
-
-exports.updateProfileImg = async (req, res) => {
-  const { JWT_SECRET_KEY } = process.env;
-  const token = req.headers.authorization;
-  const { location: profileImg, key: profileImgKey } = req.file;
-
-  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
-
-  try {
-    const oldUser = await User.findByNickname(nickname);
-
-    // 기존 유저 프로필 이미지 s3에서 제거
-    if (oldUser.profileImgKey) {
-      s3.deleteObject(
-        {
-          Bucket: 'lemonalcohol-s3',
-          Key: `${oldUser.profileImgKey}`,
-        },
-        (err, data) => {
-          console.log(err);
-        },
-      );
-    }
-
-    // 새 프로필 이미지 저장
-    const user = await User.findOneAndUpdate(
-      { nickname },
-      { profileImg, profileImgKey },
-      { new: true },
-    ).exec();
-
-    await Board.updateMany(
-      {
-        'writer.nickname': nickname,
-      },
-      { 'writer.profileImg': profileImg },
-    ).exec();
-
-    const userInfo = user.serialize();
-
-    res.status(200).send({ userInfo });
-  } catch (e) {
-    res.status(500).send({ msg: '서버 오류', e });
-  }
-};
-
-exports.removeProfileImg = async (req, res) => {
-  console.log('프로필 이미지 제거');
-  const { JWT_SECRET_KEY } = process.env;
-  const token = req.headers.authorization;
-
-  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
-
-  try {
-    const oldUser = await User.findByNickname(nickname);
-
-    // s3에 저장된 이미지라면 s3에서 제거
-    if (oldUser.profileImgKey) {
-      s3.deleteObject(
-        {
-          Bucket: 'lemonalcohol-s3',
-          Key: `${oldUser.profileImgKey}`,
-        },
-        (err, data) => {
-          console.log(data);
-        },
-      );
-    }
-
-    // 프로필 이미지 기본 이미지로 변경
-    const user = await User.findOneAndUpdate(
-      { nickname },
-      {
-        profileImg: `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
-        $unset: { profileImgKey: '' },
-      },
-      { new: true },
-    ).exec();
-
-    await Board.updateMany(
-      {
-        'writer.nickname': nickname,
-      },
-      {
-        'writer.profileImg': `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
-      },
-    ).exec();
-
-    const userInfo = user.serialize();
-
-    res.status(200).send({ userInfo });
-  } catch (e) {
-    res.status(500).send({ msg: '서버 오류', e });
-  }
-};
-
-// 유저 정보 수정
-exports.updateInfo = async (req, res) => {
-  const { JWT_SECRET_KEY } = process.env;
-  const token = req.headers.authorization;
-  const { _id, nickname } = jwt.verify(token, JWT_SECRET_KEY);
-
-  try {
-    // 닉네임 변경일 경우
-    if (req.body.nickname) {
-      const existNickname = await User.findByNickname(req.body.nickname);
-
-      // 이미 존재하는 닉네임 예외 처리
-      if (existNickname) {
-        res.status(400).send({ msg: '사용중인 닉네임 입니다.' });
-        return;
-      }
-
-      await Board.updateMany(
-        {
-          'writer.nickname': nickname,
-        },
-        { 'writer.nickname': req.body.nickname },
-      ).exec();
-    }
-
-    const user = await User.findByIdAndUpdate({ _id }, req.body, {
-      new: true,
-    });
-
-    // 새 정보로 토큰을 재발급
-    const { accessToken, refreshToken } = user.generateToken();
-    user.saveRefreshToken(refreshToken);
-    await user.save();
-
-    const userInfo = user.serialize();
-
-    res.status(200).send({ userInfo, accessToken });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
