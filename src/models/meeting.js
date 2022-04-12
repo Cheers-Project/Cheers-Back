@@ -37,6 +37,10 @@ const meetingSchema = new Schema({
     addressName: String,
     coordinates: [Number],
   },
+  view: {
+    type: Number,
+    default: 0,
+  },
 });
 
 meetingSchema.statics.findNearMeeting = async function (lon, lat) {
