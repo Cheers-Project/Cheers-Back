@@ -28,7 +28,7 @@ const boardSchema = new Schema({
     type: Number,
     default: 0,
   },
-  visit: {
+  view: {
     type: Number,
     default: 0,
   },
