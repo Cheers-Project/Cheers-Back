@@ -13,7 +13,7 @@ exports.createMeeting = async (req, res) => {
   const meeting = new Meeting({
     title,
     contents,
-    write: nickname,
+    writer: nickname,
     meetingDate,
     meetingTime,
     totalNumber,
@@ -37,7 +37,7 @@ exports.featchMeeting = async (req, res) => {
   try {
     if (sort === 'recent') {
       const meeting = await Meeting.find({}).sort({ createdDate: -1 }).limit(6);
-      res.send({ meeting });
+      res.status(200).send({ meeting });
     }
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
