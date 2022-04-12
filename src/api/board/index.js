@@ -7,6 +7,7 @@ const s3 = require('../../config/s3');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
 const {
   getBoard,
+  increaseView,
   writeBoard,
   uploadImage,
   getBoardById,
@@ -31,6 +32,7 @@ const upload = multer({
 
 router.get('/', getBoard);
 router.get('/:id', getBoardById);
+router.patch('/:id', increaseView);
 router.post('/', jwtMiddleware, writeBoard);
 router.post('/image', upload.single('image'), uploadImage);
 
