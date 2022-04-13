@@ -10,7 +10,12 @@ const meetingSchema = new Schema({
     type: String,
   },
   writer: {
-    type: String,
+    nickname: {
+      type: String,
+    },
+    profileImg: {
+      type: String,
+    },
   },
   createdDate: {
     type: Date,

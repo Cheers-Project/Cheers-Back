@@ -8,12 +8,15 @@ exports.createMeeting = async (req, res) => {
   const { title, contents, meetingDate, meetingTime, totalNumber, location } =
     req.body;
 
-  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+  const { profileImg, nickname } = jwt.verify(token, JWT_SECRET_KEY);
 
   const meeting = new Meeting({
     title,
     contents,
-    writer: nickname,
+    writer: {
+      nickname,
+      profileImg,
+    },
     meetingDate,
     meetingTime,
     totalNumber,
