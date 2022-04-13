@@ -13,7 +13,7 @@ exports.fetchMyMeeting = async (req, res) => {
   const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
 
   try {
-    const meeting = await Meeting.find({ writer: nickname }).sort({
+    const meeting = await Meeting.find({ 'writer.nickname': nickname }).sort({
       meetingDate: -1,
     });
     res.status(200).send({ meeting });
