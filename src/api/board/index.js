@@ -5,6 +5,8 @@ const path = require('path');
 
 const s3 = require('../../config/s3');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
+const sanitizeHtmlMiddleware = require('../../middleware/sanitizeHtmlMiddleware');
+
 const {
   getBoard,
   increaseView,
@@ -33,7 +35,7 @@ const upload = multer({
 router.get('/', getBoard);
 router.get('/:id', getBoardById);
 router.patch('/:id', increaseView);
-router.post('/', jwtMiddleware, writeBoard);
+router.post('/', jwtMiddleware, sanitizeHtmlMiddleware, writeBoard);
 router.post('/image', upload.single('image'), uploadImage);
 
 module.exports = router;

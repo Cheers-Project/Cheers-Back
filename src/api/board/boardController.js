@@ -4,31 +4,6 @@ const Board = require('../../models/board');
 const jwt = require('jsonwebtoken');
 const pagination = require('../../utils/pagination');
 
-const sanitizeOption = {
-  allowedTags: [
-    'h1',
-    'h2',
-    'b',
-    'i',
-    'u',
-    's',
-    'p',
-    'ul',
-    'ol',
-    'li',
-    'blockquote',
-    'a',
-    'img',
-  ],
-  allowedAttributes: {
-    a: ['href', 'name', 'target'],
-    img: ['src'],
-    li: ['class'],
-  },
-  allowedSchemesAppliedToAttributes: ['href', 'src'],
-  allowedSchemes: ['data', 'http', 'https'],
-};
-
 exports.getBoard = async (req, res) => {
   console.log('게시물 요청');
   const { sort, page } = req.query;
@@ -107,7 +82,7 @@ exports.writeBoard = async (req, res) => {
 
     const board = new Board({
       title,
-      contents: sanitizeHtml(contents, sanitizeOption),
+      contents,
       writer,
     });
 
