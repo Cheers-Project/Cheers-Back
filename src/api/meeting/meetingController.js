@@ -40,13 +40,13 @@ exports.featchMeeting = async (req, res) => {
         .sort({ createdDate: -1 })
         .limit(18);
 
-      res.status(200).send({ meeting });
+      return res.status(200).send({ meeting });
     }
     // 조회수순
     if (sort === 'view') {
       const meeting = await Meeting.find({}).sort({ view: -1 }).limit(18);
 
-      res.status(200).send({ meeting });
+      return res.status(200).send({ meeting });
     }
     // 근처 모임
     if (sort === 'near') {
@@ -65,9 +65,11 @@ exports.featchMeeting = async (req, res) => {
           },
         });
 
-        res.status(200).send({ meeting });
+        return res.status(200).send({ meeting });
       } else {
-        res.status(403).send({ msg: '위치 정보가 활성화 되어 있지 않습니다.' });
+        return res
+          .status(403)
+          .send({ msg: '위치 정보가 활성화 되어 있지 않습니다.' });
       }
     }
 
