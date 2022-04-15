@@ -12,6 +12,9 @@ const boardSchema = new Schema({
   writer: {
     type: Object,
   },
+  imgKeys: {
+    type: [String],
+  },
   createdDate: {
     type: Date,
     default: Date.now,
