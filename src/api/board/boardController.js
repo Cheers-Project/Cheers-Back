@@ -1,5 +1,3 @@
-const sanitizeHtml = require('sanitize-html');
-
 const Board = require('../../models/board');
 const jwt = require('jsonwebtoken');
 const pagination = require('../../utils/pagination');
@@ -59,12 +57,14 @@ exports.increaseView = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const board = await Board.findById(id);
-    await Board.findOneAndUpdate(
+    const oldBoard = await Board.findById(id);
+    const board = await Board.findOneAndUpdate(
       { _id: id },
-      { view: board.view + 1 },
+      { view: oldBoard.view + 1 },
       { new: true },
     );
+
+    return res.status(200).send({ board });
   } catch (e) {
     console.log(e);
   }
@@ -88,9 +88,9 @@ exports.writeBoard = async (req, res) => {
 
     await board.save();
 
-    res.status(200).send({ msg: '게시물 작성 완료' });
+    return res.status(200).send({ msg: '게시물 작성 완료' });
   } catch (e) {
-    res.status(500).send({ msg: '게시물 작성 실패' });
+    return res.status(500).send({ msg: '게시물 작성 실패' });
   }
 };
 

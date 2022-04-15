@@ -4,15 +4,16 @@ const multerS3 = require('multer-s3');
 const path = require('path');
 
 const s3 = require('../../config/s3');
+const checkOwned = require('../../middleware/checkOwned');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
 const sanitizeHtmlMiddleware = require('../../middleware/sanitizeHtmlMiddleware');
 
 const {
   getBoard,
+  getBoardById,
   increaseView,
   writeBoard,
   uploadImage,
-  getBoardById,
 } = require('./boardController');
 
 const router = express.Router();
@@ -36,6 +37,8 @@ router.get('/', getBoard);
 router.get('/:id', getBoardById);
 router.patch('/:id', increaseView);
 router.post('/', jwtMiddleware, sanitizeHtmlMiddleware, writeBoard);
+
+// 게시물 이미지 관련
 router.post('/image', upload.single('image'), uploadImage);
 
 module.exports = router;
