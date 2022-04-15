@@ -4,7 +4,6 @@ const multerS3 = require('multer-s3');
 const path = require('path');
 
 const s3 = require('../../config/s3');
-const checkOwned = require('../../middleware/checkOwned');
 const jwtMiddleware = require('../../middleware/jwtMiddleware');
 const sanitizeHtmlMiddleware = require('../../middleware/sanitizeHtmlMiddleware');
 
