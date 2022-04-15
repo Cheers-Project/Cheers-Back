@@ -1,6 +1,7 @@
 const Board = require('../../models/board');
 const jwt = require('jsonwebtoken');
 const pagination = require('../../utils/pagination');
+const s3 = require('../../config/s3');
 
 exports.getBoard = async (req, res) => {
   console.log('게시물 요청');
@@ -71,9 +72,10 @@ exports.increaseView = async (req, res) => {
 };
 
 exports.writeBoard = async (req, res) => {
+  console.log('게시물 작성');
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
-  const { title, contents } = req.body;
+  const { title, contents, imgKeys } = req.body;
 
   try {
     const { _id, nickname, profileImg } = jwt.verify(token, JWT_SECRET_KEY);
@@ -84,6 +86,7 @@ exports.writeBoard = async (req, res) => {
       title,
       contents,
       writer,
+      imgKeys,
     });
 
     await board.save();
@@ -94,7 +97,38 @@ exports.writeBoard = async (req, res) => {
   }
 };
 
+exports.deleteBoard = async (req, res) => {
+  console.log('게시물 삭제');
+  const { id } = req.params;
+
+  try {
+    const board = await Board.findById(id);
+
+    console.log(board.imgKeys);
+
+    await board.imgKeys.map((imgKey) => {
+      s3.deleteObject(
+        {
+          Bucket: 'lemonalcohol-s3',
+          Key: `${imgKey}`,
+        },
+        (err, data) => {
+          console.log(data);
+        },
+      );
+    });
+    await Board.deleteOne({ _id: id });
+    return res.status(200).send({ msg: '삭제완료' });
+  } catch (e) {
+    return res.status(500).send({ msg: '서버오류' });
+  }
+};
+
 exports.uploadImage = async (req, res) => {
-  console.log(req.file);
-  res.send({ imgUrl: req.file.location });
+  const { key: imgKey, location: imgUrl } = req.file;
+  try {
+    return res.status(200).send({ imgKey, imgUrl });
+  } catch (e) {
+    return res.status(500).send({ msg: '서버오류' });
+  }
 };
