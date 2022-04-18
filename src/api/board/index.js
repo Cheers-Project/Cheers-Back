@@ -15,6 +15,7 @@ const {
   writeBoard,
   uploadImage,
   deleteBoard,
+  updateLike,
 } = require('./boardController');
 
 const router = express.Router();
@@ -41,6 +42,7 @@ const upload = multer({
 router.get('/', getBoard);
 router.get('/:id', getBoardById);
 router.patch('/:id', increaseView);
+router.patch('/like/:id', jwtMiddleware, updateLike);
 router.post('/', jwtMiddleware, sanitizeHtmlMiddleware, writeBoard);
 router.delete('/:id', jwtMiddleware, deleteBoard);
 

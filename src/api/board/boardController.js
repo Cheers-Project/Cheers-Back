@@ -57,19 +57,56 @@ exports.getBoardById = async (req, res) => {
 };
 
 exports.increaseView = async (req, res) => {
+  console.log('조회수 증가');
   const { id } = req.params;
 
   try {
-    const oldBoard = await Board.findById(id);
-    const board = await Board.findOneAndUpdate(
+    const board = await Board.findByIdAndUpdate(
       { _id: id },
-      { view: oldBoard.view + 1 },
+      { $inc: { view: 1 } },
       { new: true },
     );
 
     return res.status(200).send({ board });
   } catch (e) {
     console.log(e);
+  }
+};
+
+exports.updateLike = async (req, res) => {
+  const { id } = req.params;
+
+  const { JWT_SECRET_KEY } = process.env;
+  const token = req.headers.authorization;
+  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+
+  const oldBoard = await Board.findById(id);
+
+  const validateLikeUser = oldBoard?.likeUsers.includes(nickname);
+
+  try {
+    if (validateLikeUser) {
+      console.log('좋아요 취소');
+      const board = await Board.findByIdAndUpdate(
+        { _id: id },
+        { $pull: { likeUsers: nickname }, $inc: { like: -1 } },
+        { new: true },
+      );
+
+      return res.status(200).send({ msg: '좋아요 취소', board });
+    }
+
+    console.log('좋아요');
+
+    const board = await Board.findByIdAndUpdate(
+      { _id: id },
+      { $addToSet: { likeUsers: nickname }, $inc: { like: 1 } },
+      { new: true },
+    );
+
+    return res.status(200).send({ msg: '좋아요', board });
+  } catch (e) {
+    return res.status(500).send({ msg: '좋아요 실패' });
   }
 };
 
@@ -134,3 +171,5 @@ exports.uploadImage = async (req, res) => {
     return res.status(500).send({ msg: '서버오류' });
   }
 };
+
+exports.checkLikeUser = async (req, res, next) => {};

@@ -27,6 +27,10 @@ const boardSchema = new Schema({
     type: Number,
     default: 0,
   },
+  likeUsers: {
+    type: [String],
+    default: [],
+  },
   comment: {
     type: Number,
     default: 0,
