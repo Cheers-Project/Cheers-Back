@@ -5,6 +5,36 @@ const User = require('../../models/user');
 const Board = require('../../models/board');
 const Meeting = require('../../models/meeting');
 
+// 내 게시물 가져오기
+exports.fetchMyBoard = async (req, res) => {
+  const { page } = req.query;
+  const { JWT_SECRET_KEY } = process.env;
+  const token = req.headers.authorization;
+
+  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+
+  try {
+    const maxPage = Math.ceil(
+      (await Board.countDocuments({
+        'writer.nickname': nickname,
+      })) / 10,
+    );
+
+    const isLastPage = maxPage - page < 0 ? true : false;
+
+    const boardList = await Board.find({ 'writer.nickname': nickname })
+      .sort({
+        createDate: -1,
+      })
+      .skip((page - 1) * 10)
+      .limit(10);
+
+    res.status(200).send({ boardList, isLastPage });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
 // 내 모임 가져오기
 exports.fetchMyMeeting = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
