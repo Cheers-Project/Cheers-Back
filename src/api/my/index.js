@@ -9,6 +9,7 @@ const {
   updateProfileImg,
   removeProfileImg,
   updateNickname,
+  fetchMyBoard,
 } = require('./myController');
 
 const s3 = require('../../config/s3');
@@ -29,6 +30,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
 });
 
+router.get('/board', jwtMiddleware, fetchMyBoard);
 router.get('/meeting', jwtMiddleware, fetchMyMeeting);
 router.patch('/nickname', jwtMiddleware, updateNickname);
 router.post(
