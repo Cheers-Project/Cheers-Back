@@ -73,16 +73,37 @@ exports.featchMeeting = async (req, res) => {
         });
 
         return res.status(200).send({ meeting, isLastPage: true });
-      } else {
-        return res.status(403).send({
-          meeting: null,
-          msg: '위치 서비스 권한을 설정해주세요.',
-        });
       }
     }
 
     // 메인 페이지 최신 작성된 10개 모임만 응답
     const meeting = await Meeting.find({}).sort({ createdDate: -1 }).limit(10);
+    res.status(200).send({ meeting });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
+exports.fetchMeetingById = async (req, res) => {
+  const { id: meetingId } = req.params;
+  try {
+    const meeting = await Meeting.findById(meetingId);
+    res.status(200).send({ meeting });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류' }, e);
+  }
+};
+
+exports.increaseView = async (req, res) => {
+  const { id: meetingId } = req.params;
+  try {
+    const meeting = await Meeting.findByIdAndUpdate(
+      meetingId,
+      {
+        $inc: { view: 1 },
+      },
+      { new: true },
+    );
     res.status(200).send({ meeting });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
