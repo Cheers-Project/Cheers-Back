@@ -38,6 +38,8 @@ exports.getBoard = async (req, res) => {
         .limit(maxBoard);
       return res.status(200).send({ boards, maxPage, page, pageNums });
     }
+
+    return res.status(400).send({ msg: '게시물 요청 실패' });
   } catch (e) {
     return res.status(500).send({ msg: '게시물 불러오기 실패' });
   }
