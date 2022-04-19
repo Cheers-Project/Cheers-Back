@@ -16,6 +16,9 @@ const meetingSchema = new Schema({
     profileImg: {
       type: String,
     },
+    _id: {
+      type: String,
+    }
   },
   createdDate: {
     type: Date,
