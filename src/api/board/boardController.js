@@ -47,15 +47,42 @@ exports.getBoard = async (req, res) => {
 
 exports.getBoardById = async (req, res) => {
   console.log('게시물 조회');
+  const { type } = req.query;
   const { id } = req.params;
+  try {
+    if (type === 'detail') {
+      const board = await Board.findByIdAndUpdate(
+        { _id: id },
+        { $inc: { view: 1 } },
+        { new: true },
+      );
+      return res.status(200).send({ board });
+    }
+    const board = await Board.findById(id);
+
+    return res.status(200).send({ board });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+exports.updateBoard = async (req, res) => {
+  console.log('게시물 수정');
+  const { id } = req.params;
+  const { title, contents, imgKeys } = req.body;
   try {
     const board = await Board.findByIdAndUpdate(
       { _id: id },
-      { $inc: { view: 1 } },
+      {
+        title: title,
+        contents: contents,
+        imgKeys: imgKeys,
+        createdDate: new Date(),
+      },
       { new: true },
     );
 
-    return res.status(200).send({ board });
+    res.status(200).send({ msg: '게시물 수정', board });
   } catch (e) {
     console.log(e);
   }
