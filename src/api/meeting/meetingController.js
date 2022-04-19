@@ -85,7 +85,9 @@ exports.featchMeeting = async (req, res) => {
 };
 
 exports.fetchMeetingById = async (req, res) => {
+  console.log('모임 상제정보 요청');
   const { id: meetingId } = req.params;
+
   try {
     const meeting = await Meeting.findByIdAndUpdate(
       meetingId,
@@ -96,6 +98,20 @@ exports.fetchMeetingById = async (req, res) => {
     );
     res.status(200).send({ meeting });
   } catch (e) {
-    res.status(500).send({ msg: '서버 오류' }, e);
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
+exports.editMeeting = async (req, res) => {
+  console.log('모임 수정');
+  const { id: meetingId } = req.params;
+
+  try {
+    const meeting = await Meeting.findByIdAndUpdate(meetingId, req.body, {
+      new: true,
+    });
+    res.status(200).send({ meeting });
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
   }
 };
