@@ -46,20 +46,8 @@ exports.getBoard = async (req, res) => {
 };
 
 exports.getBoardById = async (req, res) => {
+  console.log('게시물 조회');
   const { id } = req.params;
-  try {
-    const board = await Board.findById(id);
-
-    return res.status(200).send({ board });
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-exports.increaseView = async (req, res) => {
-  console.log('조회수 증가');
-  const { id } = req.params;
-
   try {
     const board = await Board.findByIdAndUpdate(
       { _id: id },
@@ -171,5 +159,3 @@ exports.uploadImage = async (req, res) => {
     return res.status(500).send({ msg: '서버오류' });
   }
 };
-
-exports.checkLikeUser = async (req, res, next) => {};
