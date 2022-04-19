@@ -87,16 +87,6 @@ exports.featchMeeting = async (req, res) => {
 exports.fetchMeetingById = async (req, res) => {
   const { id: meetingId } = req.params;
   try {
-    const meeting = await Meeting.findById(meetingId);
-    res.status(200).send({ meeting });
-  } catch (e) {
-    res.status(500).send({ msg: '서버 오류' }, e);
-  }
-};
-
-exports.increaseView = async (req, res) => {
-  const { id: meetingId } = req.params;
-  try {
     const meeting = await Meeting.findByIdAndUpdate(
       meetingId,
       {
@@ -106,6 +96,6 @@ exports.increaseView = async (req, res) => {
     );
     res.status(200).send({ meeting });
   } catch (e) {
-    res.status(500).send({ msg: '서버 오류', e });
+    res.status(500).send({ msg: '서버 오류' }, e);
   }
 };
