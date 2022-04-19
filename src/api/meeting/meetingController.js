@@ -117,3 +117,13 @@ exports.editMeeting = async (req, res) => {
     res.status(500).send({ msg: '서버 오류', e });
   }
 };
+
+exports.deleteMeeting = async (req, res) => {
+  const { id: meetingId } = req.params;
+  try {
+    await Meeting.deleteOne({ _id: meetingId });
+    res.status(200).send();
+  } catch (e) {
+    res.status(500).send({ msg: '서버 오류', e });
+  }
+};
