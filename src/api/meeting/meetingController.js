@@ -8,7 +8,7 @@ exports.createMeeting = async (req, res) => {
   const { title, contents, meetingDate, meetingTime, totalNumber, location } =
     req.body;
 
-  const { profileImg, nickname } = jwt.verify(token, JWT_SECRET_KEY);
+  const { profileImg, nickname, _id } = jwt.verify(token, JWT_SECRET_KEY);
 
   const meeting = new Meeting({
     title,
@@ -16,6 +16,7 @@ exports.createMeeting = async (req, res) => {
     writer: {
       nickname,
       profileImg,
+      _id,
     },
     meetingDate,
     meetingTime,
@@ -31,6 +32,7 @@ exports.createMeeting = async (req, res) => {
 
 // 모임 얻기
 exports.featchMeeting = async (req, res) => {
+  console.log('모임 리스트 요청');
   const { sort, page } = req.query;
 
   try {
@@ -85,7 +87,7 @@ exports.featchMeeting = async (req, res) => {
 };
 
 exports.fetchMeetingById = async (req, res) => {
-  console.log('모임 상제정보 요청');
+  console.log('모임 상세정보 요청');
   const { id: meetingId } = req.params;
 
   try {
