@@ -47,6 +47,7 @@ exports.getBoard = async (req, res) => {
 
 exports.getBoardById = async (req, res) => {
   console.log('게시물 조회');
+
   const { type } = req.query;
   const { id } = req.params;
   try {
