@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const commentSchema = new Schema({
-  boardId: {
+  postId: {
     type: String,
   },
   content: {
@@ -18,6 +18,6 @@ const commentSchema = new Schema({
   },
 });
 
-const Commnet = mongoose.model('Commnet', commentSchema);
+const Comment = mongoose.model('Commnet', commentSchema);
 
-module.exports = Commnet;
+module.exports = Comment;
