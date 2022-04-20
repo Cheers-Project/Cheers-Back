@@ -35,3 +35,15 @@ exports.fetchComment = async (req, res) => {
     return res.status(500).send({ msg: '댓글 요청 실패' });
   }
 };
+
+exports.deleteComment = async (req, res) => {
+  console.log('댓글 삭제');
+  const { id } = req.params;
+  try {
+    await Comment.deleteOne({ _id: id });
+
+    return res.status(200).send({ msg: '댓글 삭제' });
+  } catch (e) {
+    return res.status(500).send({ msg: '댓글 삭제 실패' });
+  }
+};
