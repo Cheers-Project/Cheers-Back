@@ -21,7 +21,7 @@ exports.createMeeting = async (req, res) => {
     meetingDate,
     meetingTime,
     totalNumber,
-    attendMember: [nickname],
+    attendMember: [_id],
     location,
   });
 
@@ -98,7 +98,11 @@ exports.fetchMeetingById = async (req, res) => {
       },
       { new: true },
     );
-    res.status(200).send({ meeting });
+
+    const isClosed =
+      meeting.totalNumber <= meeting.attendMember.length ? true : false;
+
+    res.status(200).send({ meeting, isClosed });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
@@ -119,6 +123,7 @@ exports.editMeeting = async (req, res) => {
 };
 
 exports.deleteMeeting = async (req, res) => {
+  console.log('모임 삭제');
   const { id: meetingId } = req.params;
   try {
     await Meeting.deleteOne({ _id: meetingId });
