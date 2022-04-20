@@ -28,7 +28,9 @@ exports.fetchComment = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const comments = await Comment.find({ postId: id });
+    const comments = await Comment.find({ postId: id }).sort({
+      createdDate: -1,
+    });
 
     return res.status(200).send({ comments });
   } catch (e) {
