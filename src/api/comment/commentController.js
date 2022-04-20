@@ -25,9 +25,12 @@ exports.createComment = async (req, res) => {
 
 exports.fetchComment = async (req, res) => {
   console.log('댓글 요청');
+  const { id } = req.params;
 
   try {
-    return res.status(200).send({ msg: '댓글 요청' });
+    const comments = await Comment.find({ postId: id });
+
+    return res.status(200).send({ comments });
   } catch (e) {
     return res.status(500).send({ msg: '댓글 요청 실패' });
   }
