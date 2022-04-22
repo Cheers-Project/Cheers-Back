@@ -49,3 +49,24 @@ exports.deleteComment = async (req, res) => {
     return res.status(500).send({ msg: '댓글 삭제 실패' });
   }
 };
+
+exports.updateComment = async (req, res) => {
+  console.log('게시물 수정');
+  const { id } = req.params;
+  console.log(req.body);
+  const { content } = req.body;
+  try {
+    const comment = await Comment.findByIdAndUpdate(
+      {
+        _id: id,
+      },
+      {
+        content,
+      },
+      { new: true },
+    );
+    return res.status(200).send({ msg: '댓글 수정' });
+  } catch (e) {
+    return res.status(500).send({ msg: '댓글 수정 실패' });
+  }
+};
