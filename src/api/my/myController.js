@@ -40,12 +40,15 @@ exports.fetchMyMeeting = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
 
-  const { nickname } = jwt.verify(token, JWT_SECRET_KEY);
+  const { _id } = jwt.verify(token, JWT_SECRET_KEY);
 
   try {
-    const meeting = await Meeting.find({ 'writer.nickname': nickname }).sort({
+    const meeting = await Meeting.find({
+      attendMember: { $all: [_id] },
+    }).sort({
       meetingDate: -1,
     });
+
     res.status(200).send({ meeting });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
