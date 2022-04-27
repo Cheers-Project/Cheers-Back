@@ -103,7 +103,6 @@ exports.updateProfileImg = async (req, res) => {
 
 // 유저 프로필 이미지 제거
 exports.removeProfileImg = async (req, res) => {
-  console.log('프로필 이미지 제거');
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
 
@@ -120,7 +119,7 @@ exports.removeProfileImg = async (req, res) => {
           Key: `${oldUser.profileImgKey}`,
         },
         (err, data) => {
-          console.log(data);
+          console.log(err);
         },
       );
     }

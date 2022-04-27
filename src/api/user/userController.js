@@ -5,7 +5,6 @@ const axios = require('axios').default;
 const User = require('../../models/user');
 
 exports.fetchUser = async (req, res) => {
-  console.log('유저 정보');
   const { JWT_SECRET_KEY } = process.env;
 
   try {
@@ -37,8 +36,7 @@ exports.fetchUser = async (req, res) => {
 };
 
 // login
-exports.login = async (req, res, next) => {
-  console.log('로그인');
+exports.login = async (req, res) => {
   // requset를 받아온다.
   const { userId, userPw } = req.body;
 
@@ -80,13 +78,12 @@ exports.login = async (req, res, next) => {
 
     res.status(200).json({ msg: '로그인 완료', accessToken, userInfo });
   } catch (e) {
-    res.status(500).send({ msg: '서버 오류' });
+    res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 // social login
 exports.socialLogin = async (req, res) => {
-  console.log('소셜 로그인');
   // request
   const { kakaoToken: ACCESS_TOKEN, nickname } = req.body;
 
@@ -144,13 +141,12 @@ exports.socialLogin = async (req, res) => {
 
     res.status(200).send({ msg: '카카오 로그인 성공', accessToken, userInfo });
   } catch (e) {
-    res.status(500).send({ msg: '카카오 로그인 실패' });
+    res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 // logout
 exports.logout = async (req, res) => {
-  console.log('로그아웃');
   const { JWT_SECRET_KEY } = process.env;
 
   const token = req.headers.authorization;
@@ -164,7 +160,7 @@ exports.logout = async (req, res) => {
 
     res.status(200).send({ msg: '로그아웃 성공' });
   } catch (e) {
-    res.status(500).send({ msg: '로그아웃 실패' });
+    res.status(500).send({ msg: '서버 오류', e });
   }
 };
 

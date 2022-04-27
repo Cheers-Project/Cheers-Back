@@ -32,7 +32,6 @@ exports.createMeeting = async (req, res) => {
 
 // 모임 얻기
 exports.featchMeeting = async (req, res) => {
-  console.log('모임 리스트 요청');
   const { sort, page } = req.query;
 
   try {
@@ -87,7 +86,6 @@ exports.featchMeeting = async (req, res) => {
 };
 
 exports.fetchMeetingById = async (req, res) => {
-  console.log('모임 상세정보 요청');
   const { id: meetingId } = req.params;
 
   try {
@@ -109,7 +107,6 @@ exports.fetchMeetingById = async (req, res) => {
 };
 
 exports.editMeeting = async (req, res) => {
-  console.log('모임 수정');
   const { id: meetingId } = req.params;
 
   try {
@@ -123,7 +120,6 @@ exports.editMeeting = async (req, res) => {
 };
 
 exports.deleteMeeting = async (req, res) => {
-  console.log('모임 삭제');
   const { id: meetingId } = req.params;
   try {
     await Meeting.deleteOne({ _id: meetingId });
