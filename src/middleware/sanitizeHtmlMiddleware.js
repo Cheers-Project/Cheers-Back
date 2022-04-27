@@ -30,7 +30,7 @@ const sanitizeHtmlMiddleware = (req, res, next) => {
 
   try {
     if (!contents) {
-      res.status(400).send({ msg: '내용이 없습니다.' });
+      return res.status(400).send({ msg: '내용이 없습니다.' });
     }
     const sanitizedCotents = sanitizeHtml(contents, sanitizeOption);
 
@@ -38,7 +38,7 @@ const sanitizeHtmlMiddleware = (req, res, next) => {
 
     next();
   } catch (e) {
-    res.status(500).send({ msg: '서버 오류' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 

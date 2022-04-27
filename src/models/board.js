@@ -19,10 +19,6 @@ const boardSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  modifiedDate: {
-    type: Date,
-    default: Date.now,
-  },
   like: {
     type: Number,
     default: 0,
