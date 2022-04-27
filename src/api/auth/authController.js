@@ -51,6 +51,6 @@ exports.kakaoCallback = async (req, res) => {
 
     res.status(200).send({ accessToken, userInfo });
   } catch (err) {
-    console.log(err);
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };

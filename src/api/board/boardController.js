@@ -4,7 +4,6 @@ const pagination = require('../../utils/pagination');
 const s3 = require('../../config/s3');
 
 exports.getBoard = async (req, res) => {
-  console.log('게시물 요청');
   const { sort, page } = req.query;
 
   try {
@@ -41,13 +40,11 @@ exports.getBoard = async (req, res) => {
 
     return res.status(400).send({ msg: '게시물 요청 실패' });
   } catch (e) {
-    return res.status(500).send({ msg: '게시물 불러오기 실패' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 exports.getBoardById = async (req, res) => {
-  console.log('게시물 조회');
-
   const { type } = req.query;
   const { id } = req.params;
   try {
@@ -63,12 +60,11 @@ exports.getBoardById = async (req, res) => {
 
     return res.status(200).send({ board });
   } catch (e) {
-    console.log(e);
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 exports.updateBoard = async (req, res) => {
-  console.log('게시물 수정');
   const { id } = req.params;
   const { title, contents, imgKeys } = req.body;
   try {
@@ -85,7 +81,7 @@ exports.updateBoard = async (req, res) => {
 
     res.status(200).send({ msg: '게시물 수정', board });
   } catch (e) {
-    console.log(e);
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
@@ -102,7 +98,6 @@ exports.updateLike = async (req, res) => {
 
   try {
     if (validateLikeUser) {
-      console.log('좋아요 취소');
       const board = await Board.findByIdAndUpdate(
         { _id: id },
         { $pull: { likeUsers: nickname }, $inc: { like: -1 } },
@@ -112,8 +107,6 @@ exports.updateLike = async (req, res) => {
       return res.status(200).send({ msg: '좋아요 취소', board });
     }
 
-    console.log('좋아요');
-
     const board = await Board.findByIdAndUpdate(
       { _id: id },
       { $addToSet: { likeUsers: nickname }, $inc: { like: 1 } },
@@ -122,12 +115,11 @@ exports.updateLike = async (req, res) => {
 
     return res.status(200).send({ msg: '좋아요', board });
   } catch (e) {
-    return res.status(500).send({ msg: '좋아요 실패' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 exports.writeBoard = async (req, res) => {
-  console.log('게시물 작성');
   const { JWT_SECRET_KEY } = process.env;
   const token = req.headers.authorization;
   const { title, contents, imgKeys } = req.body;
@@ -148,18 +140,15 @@ exports.writeBoard = async (req, res) => {
 
     return res.status(200).send({ msg: '게시물 작성 완료' });
   } catch (e) {
-    return res.status(500).send({ msg: '게시물 작성 실패' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
 exports.deleteBoard = async (req, res) => {
-  console.log('게시물 삭제');
   const { id } = req.params;
 
   try {
     const board = await Board.findById(id);
-
-    console.log(board.imgKeys);
 
     await board.imgKeys.map((imgKey) => {
       s3.deleteObject(
@@ -175,7 +164,7 @@ exports.deleteBoard = async (req, res) => {
     await Board.deleteOne({ _id: id });
     return res.status(200).send({ msg: '삭제완료' });
   } catch (e) {
-    return res.status(500).send({ msg: '서버오류' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
 
@@ -184,6 +173,6 @@ exports.uploadImage = async (req, res) => {
   try {
     return res.status(200).send({ imgKey, imgUrl });
   } catch (e) {
-    return res.status(500).send({ msg: '서버오류' });
+    return res.status(500).send({ msg: '서버 오류', e });
   }
 };
