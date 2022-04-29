@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const hpp = require('hpp');
+const helmet = require('helmet');
 
 const api = require('./api');
 
@@ -14,6 +16,9 @@ mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => console.log('DB connected'))
   .catch((err) => console.log(err));
+
+app.use(hpp());
+app.use(helmet());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
