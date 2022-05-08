@@ -1,5 +1,6 @@
 const Meeting = require('../../models/meeting');
 const jwt = require('jsonwebtoken');
+const { format } = require('date-fns');
 
 exports.createMeeting = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
@@ -35,12 +36,13 @@ exports.featchMeeting = async (req, res) => {
   const { sort, page } = req.query;
 
   try {
+    const today = format(new Date(), 'yyyy-MM-dd');
     const maxPage = Math.ceil((await Meeting.countDocuments({})) / 3);
     const isLastPage = maxPage - page < 0 ? true : false;
 
     // 최신순
     if (sort === 'recent') {
-      const meeting = await Meeting.find({})
+      const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ createdDate: -1 })
         .skip((page - 1) * 3)
         .limit(3);
@@ -49,7 +51,7 @@ exports.featchMeeting = async (req, res) => {
     }
     // 조회수순
     if (sort === 'view') {
-      const meeting = await Meeting.find({})
+      const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ view: -1 })
         .skip((page - 1) * 3)
         .limit(3);
@@ -62,6 +64,7 @@ exports.featchMeeting = async (req, res) => {
       const { lon, lat } = req.query;
       if (lon && lat) {
         const meeting = await Meeting.find({
+          meetingDate: { $gte: today },
           location: {
             $near: {
               $maxDistance: 2000,
