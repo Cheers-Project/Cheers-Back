@@ -1,5 +1,6 @@
 const Comment = require('../../models/comment');
 const jwt = require('jsonwebtoken');
+const Board = require('../../models/board');
 
 exports.createComment = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
@@ -16,6 +17,12 @@ exports.createComment = async (req, res) => {
       writer,
     });
     await comment.save();
+    console.log('댓글 수 증가');
+    await Board.findByIdAndUpdate(
+      { _id: postId },
+      { $inc: { comment: 1 } },
+      { new: true },
+    );
     return res.status(200).send({ msg: '댓글 작성' });
   } catch (e) {
     return res.status(500).send({ msg: '서버 오류', e });
@@ -40,6 +47,11 @@ exports.deleteComment = async (req, res) => {
   const { id } = req.params;
   try {
     await Comment.deleteOne({ _id: id });
+    await Board.findByIdAndUpdate(
+      { _id: id },
+      { $inc: { comment: -1 } },
+      { new: true },
+    );
 
     return res.status(200).send({ msg: '댓글 삭제' });
   } catch (e) {
