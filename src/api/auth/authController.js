@@ -50,7 +50,7 @@ exports.kakaoCallback = async (req, res) => {
     userInfo.save();
 
     res.status(200).send({ accessToken, userInfo });
-  } catch (err) {
+  } catch (e) {
     return res.status(500).send({ msg: '서버 오류', e });
   }
 };
