@@ -1,4 +1,5 @@
 const express = require('express');
+const jwtMiddleware = require('../../middleware/jwtMiddleware');
 
 const {
   login,
@@ -11,7 +12,7 @@ const {
 const router = express.Router();
 
 router.get('/', fetchUser);
-router.get('/logout', logout);
+router.get('/logout', jwtMiddleware, logout);
 router.post('/login', login);
 router.post('/login/:social', socialLogin);
 router.post('/regist', regist);
