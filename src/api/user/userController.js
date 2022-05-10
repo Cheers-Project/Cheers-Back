@@ -190,7 +190,7 @@ exports.regist = async (req, res) => {
 
   // 필수 입력 항목 예외처리
   if (validatedResult.error) {
-    res.status(400).send({ error: validatedResult.error });
+    res.status(400).send({ msg: validatedResult.error.details[0].message });
     return;
   }
 
