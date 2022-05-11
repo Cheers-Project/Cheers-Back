@@ -52,8 +52,8 @@ exports.featchMeeting = async (req, res) => {
     if (sort === 'recent') {
       const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ createdDate: -1 })
-        .skip((page - 1) * 3)
-        .limit(3);
+        .skip((page - 1) * 12)
+        .limit(12);
 
       return res.status(200).send({ meeting, isLastPage });
     }
@@ -61,8 +61,8 @@ exports.featchMeeting = async (req, res) => {
     if (sort === 'view') {
       const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ view: -1 })
-        .skip((page - 1) * 3)
-        .limit(3);
+        .skip((page - 1) * 12)
+        .limit(12);
 
       return res.status(200).send({ meeting, isLastPage });
     }
