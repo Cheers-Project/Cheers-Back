@@ -12,6 +12,7 @@ const sanitizeOption = {
     'ul',
     'ol',
     'li',
+    'br',
     'blockquote',
     'a',
     'img',
