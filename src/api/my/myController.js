@@ -4,6 +4,7 @@ const s3 = require('../../config/s3');
 const User = require('../../models/user');
 const Board = require('../../models/board');
 const Meeting = require('../../models/meeting');
+const Comment = require('../../models/comment');
 
 // 내 게시물 가져오기
 exports.fetchMyBoard = async (req, res) => {
@@ -86,12 +87,30 @@ exports.updateProfileImg = async (req, res) => {
       { new: true },
     ).exec();
 
-    await Board.updateMany(
+    const updateBoard = Board.updateMany(
       {
         'writer.nickname': nickname,
       },
       { 'writer.profileImg': profileImg },
     ).exec();
+
+    const updateMeeting = Meeting.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      { 'writer.profileImg': profileImg },
+    ).exec();
+
+    const updateComment = Comment.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      {
+        'writer.profileImg': profileImg,
+      },
+    ).exec();
+
+    await Promise.all([updateBoard, updateMeeting, updateComment]);
 
     const userInfo = user.serialize();
 
@@ -134,7 +153,7 @@ exports.removeProfileImg = async (req, res) => {
       { new: true },
     ).exec();
 
-    await Board.updateMany(
+    const updateBoard = Board.updateMany(
       {
         'writer.nickname': nickname,
       },
@@ -142,6 +161,26 @@ exports.removeProfileImg = async (req, res) => {
         'writer.profileImg': `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
       },
     ).exec();
+
+    const updateMeeting = Meeting.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      {
+        'writer.profileImg': `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
+      },
+    ).exec();
+
+    const updateComment = Comment.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      {
+        'writer.profileImg': `https://lemonalcohol-s3.s3.ap-northeast-2.amazonaws.com/profile/default_profile.png`,
+      },
+    ).exec();
+
+    await Promise.all([updateBoard, updateMeeting, updateComment]);
 
     const userInfo = user.serialize();
 
@@ -175,13 +214,20 @@ exports.updateNickname = async (req, res) => {
 
     const updateMeeting = Meeting.updateMany(
       {
-        writer: nickname,
+        'writer.nickname': nickname,
       },
-      { writer: req.body.nickname },
+      { 'writer.nickname': req.body.nickname },
     ).exec();
 
+    const upateComment = Comment.updateMany(
+      {
+        'writer.nickname': nickname,
+      },
+      { 'writer.nickname': req.body.nickname },
+    );
+
     // 게시물과 모임의 닉네임 변경은 순차 작업할 필요가 없기 때문에 병렬 처리
-    await Promise.all([updateBoard, updateMeeting]);
+    await Promise.all([updateBoard, updateMeeting, upateComment]);
 
     const user = await User.findByIdAndUpdate({ _id }, req.body, {
       new: true,
