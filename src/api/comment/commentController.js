@@ -17,7 +17,7 @@ exports.createComment = async (req, res) => {
       writer,
     });
     await comment.save();
-    console.log('댓글 수 증가');
+
     await Board.findByIdAndUpdate(
       { _id: postId },
       { $inc: { comment: 1 } },
@@ -45,10 +45,11 @@ exports.fetchComment = async (req, res) => {
 
 exports.deleteComment = async (req, res) => {
   const { id } = req.params;
+  const { postId } = req.body;
   try {
     await Comment.deleteOne({ _id: id });
     await Board.findByIdAndUpdate(
-      { _id: id },
+      { _id: postId },
       { $inc: { comment: -1 } },
       { new: true },
     );
