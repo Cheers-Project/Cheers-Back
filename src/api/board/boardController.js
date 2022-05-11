@@ -174,7 +174,7 @@ exports.deleteBoard = async (req, res) => {
   }
 };
 
-exports.uploadImage = async (req, res) => {
+exports.uploadImage = (req, res) => {
   const { key: imgKey, location: imgUrl } = req.file;
   try {
     return res.status(200).send({ imgKey, imgUrl });

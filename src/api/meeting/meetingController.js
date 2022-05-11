@@ -1,4 +1,5 @@
 const Meeting = require('../../models/meeting');
+const User = require('../../models/user');
 const jwt = require('jsonwebtoken');
 const { format } = require('date-fns');
 
@@ -9,26 +10,33 @@ exports.createMeeting = async (req, res) => {
   const { title, contents, meetingDate, meetingTime, totalNumber, location } =
     req.body;
 
-  const { profileImg, nickname, _id } = jwt.verify(token, JWT_SECRET_KEY);
+  try {
+    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
 
-  const meeting = new Meeting({
-    title,
-    contents,
-    writer: {
-      nickname,
-      profileImg,
-      _id,
-    },
-    meetingDate,
-    meetingTime,
-    totalNumber,
-    attendMember: [_id],
-    location,
-  });
+    const user = await User.findById(_id);
+    const writer = {
+      _id: user._id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    };
 
-  await meeting.save();
+    const meeting = new Meeting({
+      title,
+      contents,
+      writer,
+      meetingDate,
+      meetingTime,
+      totalNumber,
+      attendMember: [_id],
+      location,
+    });
 
-  res.status(200).send(meeting);
+    await meeting.save();
+
+    res.status(200).send(meeting);
+  } catch (e) {
+    return res.status(500).send({ msg: '서버 오류', e });
+  }
 };
 
 // 모임 얻기
