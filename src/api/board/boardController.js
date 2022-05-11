@@ -1,4 +1,5 @@
 const Board = require('../../models/board');
+const User = require('../../models/user');
 const jwt = require('jsonwebtoken');
 const pagination = require('../../utils/pagination');
 const s3 = require('../../config/s3');
@@ -125,9 +126,14 @@ exports.writeBoard = async (req, res) => {
   const { title, contents, imgKeys } = req.body;
 
   try {
-    const { _id, nickname, profileImg } = jwt.verify(token, JWT_SECRET_KEY);
+    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
 
-    const writer = { _id, nickname, profileImg };
+    const user = await User.findById(_id);
+    const writer = {
+      _id: user._id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    };
 
     const board = new Board({
       title,
@@ -157,7 +163,7 @@ exports.deleteBoard = async (req, res) => {
           Key: `${imgKey}`,
         },
         (err, data) => {
-          console.log(data);
+          console.log(err);
         },
       );
     });
