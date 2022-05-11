@@ -1,6 +1,7 @@
 const Comment = require('../../models/comment');
 const jwt = require('jsonwebtoken');
 const Board = require('../../models/board');
+const User = require('../../models/user');
 
 exports.createComment = async (req, res) => {
   const { JWT_SECRET_KEY } = process.env;
@@ -8,9 +9,13 @@ exports.createComment = async (req, res) => {
   const { postId, content } = req.body;
 
   try {
-    const { _id, nickname, profileImg } = jwt.verify(token, JWT_SECRET_KEY);
-    const writer = { _id, nickname, profileImg };
-
+    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
+    const user = await User.findById(_id);
+    const writer = {
+      _id: user._id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    };
     const comment = new Comment({
       postId,
       content,
