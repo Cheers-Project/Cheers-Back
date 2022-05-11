@@ -134,7 +134,7 @@ exports.deleteMeeting = async (req, res) => {
   const { id: meetingId } = req.params;
   try {
     await Meeting.deleteOne({ _id: meetingId });
-    res.status(200).send();
+    res.status(200).send({ msg: '모임이 삭제 되었습니다' });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
