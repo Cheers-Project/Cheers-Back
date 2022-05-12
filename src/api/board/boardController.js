@@ -1,5 +1,6 @@
 const Board = require('../../models/board');
 const User = require('../../models/user');
+const Comment = require('../../models/comment');
 const jwt = require('jsonwebtoken');
 const pagination = require('../../utils/pagination');
 const s3 = require('../../config/s3');
@@ -65,6 +66,49 @@ exports.getBoardById = async (req, res) => {
   }
 };
 
+exports.writeBoard = async (req, res) => {
+  const { JWT_SECRET_KEY } = process.env;
+  const token = req.headers.authorization;
+  const { title, contents, imgKeys } = req.body;
+
+  try {
+    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
+
+    const user = await User.findById(_id);
+    const writer = {
+      _id: user._id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    };
+
+    if (!title) {
+      return res.status(400).send({ msg: '제목이 없습니다' });
+    }
+
+    const board = new Board({
+      title,
+      contents,
+      writer,
+      imgKeys,
+    });
+
+    await board.save();
+
+    return res.status(200).send({ msg: '게시물 작성 완료' });
+  } catch (e) {
+    return res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
+exports.uploadImage = async (req, res) => {
+  const { key: imgKey, location: imgUrl } = req.file;
+  try {
+    return res.status(200).send({ imgKey, imgUrl });
+  } catch (e) {
+    return res.status(500).send({ msg: '서버 오류', e });
+  }
+};
+
 exports.updateBoard = async (req, res) => {
   const { id } = req.params;
   const { title, contents, imgKeys } = req.body;
@@ -120,36 +164,6 @@ exports.updateLike = async (req, res) => {
   }
 };
 
-exports.writeBoard = async (req, res) => {
-  const { JWT_SECRET_KEY } = process.env;
-  const token = req.headers.authorization;
-  const { title, contents, imgKeys } = req.body;
-
-  try {
-    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
-
-    const user = await User.findById(_id);
-    const writer = {
-      _id: user._id,
-      nickname: user.nickname,
-      profileImg: user.profileImg,
-    };
-
-    const board = new Board({
-      title,
-      contents,
-      writer,
-      imgKeys,
-    });
-
-    await board.save();
-
-    return res.status(200).send({ msg: '게시물 작성 완료' });
-  } catch (e) {
-    return res.status(500).send({ msg: '서버 오류', e });
-  }
-};
-
 exports.deleteBoard = async (req, res) => {
   const { id } = req.params;
 
@@ -167,6 +181,7 @@ exports.deleteBoard = async (req, res) => {
         },
       );
     });
+    await Comment.deleteMany({ postId: id });
     await Board.deleteOne({ _id: id });
     return res.status(200).send({ msg: '삭제완료' });
   } catch (e) {
