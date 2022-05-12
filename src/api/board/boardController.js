@@ -188,3 +188,12 @@ exports.deleteBoard = async (req, res) => {
     return res.status(500).send({ msg: '서버 오류', e });
   }
 };
+
+exports.uploadImage = (req, res) => {
+  const { key: imgKey, location: imgUrl } = req.file;
+  try {
+    return res.status(200).send({ imgKey, imgUrl });
+  } catch (e) {
+    return res.status(500).send({ msg: '서버 오류', e });
+  }
+};

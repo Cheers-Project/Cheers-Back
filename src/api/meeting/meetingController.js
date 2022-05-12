@@ -1,5 +1,7 @@
 const Meeting = require('../../models/meeting');
 const Comment = require('../../models/comment');
+const User = require('../../models/user');
+
 const jwt = require('jsonwebtoken');
 const { format } = require('date-fns');
 
@@ -10,26 +12,33 @@ exports.createMeeting = async (req, res) => {
   const { title, contents, meetingDate, meetingTime, totalNumber, location } =
     req.body;
 
-  const { profileImg, nickname, _id } = jwt.verify(token, JWT_SECRET_KEY);
+  try {
+    const { _id } = jwt.verify(token, JWT_SECRET_KEY);
 
-  const meeting = new Meeting({
-    title,
-    contents,
-    writer: {
-      nickname,
-      profileImg,
-      _id,
-    },
-    meetingDate,
-    meetingTime,
-    totalNumber,
-    attendMember: [_id],
-    location,
-  });
+    const user = await User.findById(_id);
+    const writer = {
+      _id: user._id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    };
 
-  await meeting.save();
+    const meeting = new Meeting({
+      title,
+      contents,
+      writer,
+      meetingDate,
+      meetingTime,
+      totalNumber,
+      attendMember: [_id],
+      location,
+    });
 
-  res.status(200).send(meeting);
+    await meeting.save();
+
+    res.status(200).send(meeting);
+  } catch (e) {
+    return res.status(500).send({ msg: '서버 오류', e });
+  }
 };
 
 // 모임 얻기
@@ -45,8 +54,8 @@ exports.featchMeeting = async (req, res) => {
     if (sort === 'recent') {
       const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ createdDate: -1 })
-        .skip((page - 1) * 3)
-        .limit(3);
+        .skip((page - 1) * 12)
+        .limit(12);
 
       return res.status(200).send({ meeting, isLastPage });
     }
@@ -54,8 +63,8 @@ exports.featchMeeting = async (req, res) => {
     if (sort === 'view') {
       const meeting = await Meeting.find({ meetingDate: { $gte: today } })
         .sort({ view: -1 })
-        .skip((page - 1) * 3)
-        .limit(3);
+        .skip((page - 1) * 12)
+        .limit(12);
 
       return res.status(200).send({ meeting, isLastPage });
     }
@@ -128,7 +137,7 @@ exports.deleteMeeting = async (req, res) => {
   try {
     await Comment.deleteMany({ postId: id });
     await Meeting.deleteOne({ _id: meetingId });
-    res.status(200).send();
+    res.status(200).send({ msg: '모임이 삭제 되었습니다' });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
   }
