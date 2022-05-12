@@ -181,7 +181,7 @@ exports.deleteBoard = async (req, res) => {
         },
       );
     });
-
+    await Comment.deleteMany({ postId: id });
     await Board.deleteOne({ _id: id });
     return res.status(200).send({ msg: '삭제완료' });
   } catch (e) {

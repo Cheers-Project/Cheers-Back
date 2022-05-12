@@ -1,4 +1,5 @@
 const Meeting = require('../../models/meeting');
+const Comment = require('../../models/comment');
 const jwt = require('jsonwebtoken');
 const { format } = require('date-fns');
 
@@ -125,6 +126,7 @@ exports.editMeeting = async (req, res) => {
 exports.deleteMeeting = async (req, res) => {
   const { id: meetingId } = req.params;
   try {
+    await Comment.deleteMany({ postId: id });
     await Meeting.deleteOne({ _id: meetingId });
     res.status(200).send();
   } catch (e) {
