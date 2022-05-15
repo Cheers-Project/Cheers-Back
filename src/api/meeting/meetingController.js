@@ -135,7 +135,7 @@ exports.editMeeting = async (req, res) => {
 exports.deleteMeeting = async (req, res) => {
   const { id: meetingId } = req.params;
   try {
-    await Comment.deleteMany({ postId: id });
+    await Comment.deleteMany({ postId: meetingId });
     await Meeting.deleteOne({ _id: meetingId });
     res.status(200).send({ msg: '모임이 삭제 되었습니다' });
   } catch (e) {
