@@ -91,7 +91,9 @@ exports.featchMeeting = async (req, res) => {
     }
 
     // 메인 페이지 최신 작성된 10개 모임만 응답
-    const meeting = await Meeting.find({}).sort({ createdDate: -1 }).limit(10);
+    const meeting = await Meeting.find({ meetingDate: { $gte: today } })
+      .sort({ createdDate: -1 })
+      .limit(10);
     res.status(200).send({ meeting });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
@@ -135,7 +137,7 @@ exports.editMeeting = async (req, res) => {
 exports.deleteMeeting = async (req, res) => {
   const { id: meetingId } = req.params;
   try {
-    await Comment.deleteMany({ postId: id });
+    await Comment.deleteMany({ postId: meetingId });
     await Meeting.deleteOne({ _id: meetingId });
     res.status(200).send({ msg: '모임이 삭제 되었습니다' });
   } catch (e) {
