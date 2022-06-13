@@ -91,7 +91,9 @@ exports.featchMeeting = async (req, res) => {
     }
 
     // 메인 페이지 최신 작성된 10개 모임만 응답
-    const meeting = await Meeting.find({}).sort({ createdDate: -1 }).limit(10);
+    const meeting = await Meeting.find({ meetingDate: { $gte: today } })
+      .sort({ createdDate: -1 })
+      .limit(10);
     res.status(200).send({ meeting });
   } catch (e) {
     res.status(500).send({ msg: '서버 오류', e });
