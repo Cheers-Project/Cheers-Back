@@ -22,4 +22,4 @@
 - Route 53 : 도메인 관리
 - S3 : 이미지 관리
 - MongoDB Atlas : DB 배포
-- NGINX :
+
